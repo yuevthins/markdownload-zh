@@ -15,6 +15,18 @@
 
 </div>
 
+## 使用教程
+
+<div align="center">
+
+https://github.com/user-attachments/assets/tutorial.mp4
+
+<video src="https://github.com/yuevthins/markdownload-zh/raw/main/docs/tutorial.mp4" width="720" controls muted></video>
+
+*打开网页 → 点击图标 → 预览 Markdown → 一键下载*
+
+</div>
+
 ---
 
 ## 为什么选择 MarkDownload 中文版？

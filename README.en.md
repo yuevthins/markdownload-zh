@@ -15,6 +15,16 @@ English | [简体中文](README.md)
 
 </div>
 
+## Tutorial
+
+<div align="center">
+
+<video src="https://github.com/yuevthins/markdownload-zh/raw/main/docs/tutorial.mp4" width="720" controls muted></video>
+
+*Open page → Click icon → Preview Markdown → Download*
+
+</div>
+
 ---
 
 ## Why MarkDownload Chinese Edition?
