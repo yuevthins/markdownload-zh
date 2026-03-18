@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=400, initial-scale=1.0">
+  <title>MarkDownload</title>
+  <script type="module" crossorigin src="/chunks/popup-C8uNASKZ.js"></script>
+  <link rel="stylesheet" crossorigin href="/assets/popup-BBUQVe1J.css">
+</head>
+<body>
+  <div id="app">
+    <!-- 加载状态 -->
+    <div id="loading" class="loading">
+      <div class="spinner"></div>
+      <p>正在提取内容...</p>
+    </div>
+
+    <!-- 主界面 -->
+    <div id="main" class="main hidden">
+      <div class="header">
+        <input type="text" id="title" class="title-input" placeholder="文章标题" autofocus>
+        <div class="actions">
+          <button id="btn-copy" class="btn" title="复制到剪贴板">📋</button>
+          <button id="btn-download" class="btn btn-primary" title="下载">⬇️ 下载</button>
+        </div>
+      </div>
+
+      <div class="preview-container">
+        <pre id="preview" class="preview"></pre>
+      </div>
+
+      <div class="status-bar">
+        <span id="status"></span>
+        <span id="word-count"></span>
+      </div>
+    </div>
+
+    <!-- 错误状态 -->
+    <div id="error" class="error hidden">
+      <p>❌ 提取失败</p>
+      <p id="error-message"></p>
+      <button id="btn-retry" class="btn">重试</button>
+    </div>
+  </div>
+
+</body>
+</html>

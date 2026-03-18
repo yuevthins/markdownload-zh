@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128">
+  <!-- 蓝色圆角背景 -->
+  <rect width="128" height="128" rx="20" fill="#4a90d9"/>
+
+  <!-- M 字母 - 优化版，更粗的线条确保小尺寸清晰 -->
+  <path d="M16 98 L16 30 L32 30 L48 58 L64 30 L80 30 L80 98 L64 98 L64 52 L48 80 L32 52 L32 98 Z" fill="white"/>
+
+  <!-- 下载箭头 ↓ - 调整位置和大小 -->
+  <path d="M92 30 L92 62 L80 62 L104 94 L128 62 L116 62 L116 30 Z" fill="white"/>
+</svg>

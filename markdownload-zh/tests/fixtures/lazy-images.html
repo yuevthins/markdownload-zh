@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>懒加载图片测试</title>
+</head>
+<body>
+  <article>
+    <h1>懒加载图片测试</h1>
+    <p>这个测试用例验证各种懒加载图片属性的处理。</p>
+
+    <h2>data-src（最常见）</h2>
+    <img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7"
+         data-src="https://example.com/image1.jpg"
+         alt="data-src 图片">
+
+    <h2>data-original（知乎风格）</h2>
+    <img src="placeholder.gif"
+         data-original="https://example.com/image2.jpg"
+         alt="data-original 图片">
+
+    <h2>data-actualsrc（微信风格）</h2>
+    <img src="blank.png"
+         data-actualsrc="https://mmbiz.qpic.cn/image3.jpg"
+         alt="data-actualsrc 图片">
+
+    <h2>data-lazy-src</h2>
+    <img src="loading.gif"
+         data-lazy-src="https://example.com/image4.jpg"
+         alt="data-lazy-src 图片">
+
+    <h2>srcset</h2>
+    <img src="tiny.jpg"
+         srcset="https://example.com/image5-small.jpg 480w, https://example.com/image5-large.jpg 1024w"
+         alt="srcset 图片">
+
+    <h2>正常图片（不需要处理）</h2>
+    <img src="https://example.com/normal-image.jpg" alt="正常图片">
+
+    <p>如果所有图片都能正确提取真实 URL，说明懒加载处理逻辑正常。</p>
+  </article>
+</body>
+</html>

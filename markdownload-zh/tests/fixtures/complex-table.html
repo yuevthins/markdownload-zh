@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>复杂表格测试</title>
+</head>
+<body>
+  <article>
+    <h1>TikTok Shop 风格的复杂表格</h1>
+    <p>这个测试用例模拟 TikTok Shop 学习中心的复杂表格结构。</p>
+
+    <table data-zone-id="abc123" class="rich-text-table">
+      <colgroup>
+        <col style="width: 200px">
+        <col style="width: 300px">
+      </colgroup>
+      <tbody>
+        <tr>
+          <td data-slate-editor="true" contenteditable="true">
+            <div data-zone-id="z1">
+              <p><span data-string="true">商品名称</span></p>
+            </div>
+          </td>
+          <td data-slate-editor="true" contenteditable="true">
+            <div data-zone-id="z2">
+              <p><span data-string="true">商品描述</span></p>
+            </div>
+          </td>
+        </tr>
+        <tr>
+          <td data-slate-editor="true" contenteditable="true">
+            <div data-zone-id="z3">
+              <p><span data-leaf="true">iPhone 15 Pro</span></p>
+            </div>
+          </td>
+          <td data-slate-editor="true" contenteditable="true">
+            <div data-zone-id="z4">
+              <p><span data-leaf="true">苹果最新旗舰手机，A17 Pro 芯片</span></p>
+            </div>
+          </td>
+        </tr>
+        <tr>
+          <td data-slate-editor="true" contenteditable="true">
+            <div data-zone-id="z5">
+              <p><span data-leaf="true">MacBook Pro</span></p>
+            </div>
+          </td>
+          <td data-slate-editor="true" contenteditable="true">
+            <div data-zone-id="z6">
+              <p><span data-leaf="true">M3 芯片笔记本电脑，专业级性能</span></p>
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h2>带 rowspan 的表格</h2>
+    <table>
+      <tbody>
+        <tr>
+          <td rowspan="2">合并行</td>
+          <td>普通单元格 1</td>
+        </tr>
+        <tr>
+          <td>普通单元格 2</td>
+        </tr>
+        <tr>
+          <td>第三行</td>
+          <td>第三行第二列</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <p>如果表格正确转换，说明表格预处理逻辑工作正常。</p>
+  </article>
+</body>
+</html>

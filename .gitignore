@@ -1,0 +1,21 @@
+# OS
+.DS_Store
+
+# IDE / Tools
+.claude/
+.playwright-mcp/
+
+# Archives (too large for git)
+*.zip
+
+# Node
+node_modules/
+.output/
+dist/
+*.log
+
+# Test reports
+markdownload-zh/tests/reports/
+
+# Synology conflict files
+*_Conflict.*

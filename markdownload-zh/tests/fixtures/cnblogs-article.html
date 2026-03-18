@@ -1,0 +1,638 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="referrer" content="origin-when-cross-origin" />
+    <meta name="keywords" content="LLM快速开发" />
+    <meta name="description" content="简介 AI Agent 不仅仅是一个能聊天的机器人（如普通的 ChatGPT），而是一个能够感知环境、进行推理、自主决策并调用工具来完成特定任务的智能系统，更够完成更为复杂的AI场景需求。 AI Agent 功能 根据查阅的资料，agent的功能点如下： Agent = LLM &#x2B; 规划 &#x2B; 记忆 " />
+    <meta property="og:description" content="简介 AI Agent 不仅仅是一个能聊天的机器人（如普通的 ChatGPT），而是一个能够感知环境、进行推理、自主决策并调用工具来完成特定任务的智能系统，更够完成更为复杂的AI场景需求。 AI Agent 功能 根据查阅的资料，agent的功能点如下： Agent = LLM &#x2B; 规划 &#x2B; 记忆 " />
+    <meta property="og:image" content="https://assets.cnblogs.com/images/wechat-share.jpg" />
+    <meta http-equiv="Cache-Control" content="no-transform" />
+    <meta http-equiv="Cache-Control" content="no-siteapp" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <title>langchain 快速入门(四)：搭建强大的AI Agent - ClownLMe - 博客园</title>
+    <link rel="icon" id="favicon" href="https://assets.cnblogs.com/favicon_v3_2.ico" type="image/x-icon" />
+    <link rel="canonical" href="https://www.cnblogs.com/ClownLMe/p/19529417" />
+    
+    <link rel="stylesheet" href="/css/blog-common.min.css?v=R-rVrNMCww2yul5xXUhO700E4bdSawv9GWDBDURYdKA" />
+    
+
+    <link id="MainCss" rel="stylesheet" href="/skins/bluesky/bundle-bluesky.min.css?v=voT1jkWclVESD0WzBbBoYCNARzc4OCoY2UL4-rUs9rQ" />
+        <link id="highlighter-theme-cnblogs" type="text/css" rel="stylesheet" href="/css/hljs/cnblogs.css?v=5J1NDtbnnIr2Rc2SdhEMlMxD4l9Eydj88B31E7_NhS4" />
+    
+    <link type="text/css" rel="stylesheet" href="/css/fonts/CascadiaCode-SemiLight.min.css" />
+    <link id="mobile-style" media="only screen and (max-width: 767px)" type="text/css" rel="stylesheet" href="/skins/bluesky/bundle-bluesky-mobile.min.css?v=6M1WRtRQHtepB8czH-DSfhU3aKa9sboo9Re86WcE0Vs" />
+    
+    <link type="application/rss+xml" rel="alternate" href="https://www.cnblogs.com/ClownLMe/rss" />
+    <link type="application/rsd+xml" rel="EditURI" href="https://www.cnblogs.com/ClownLMe/rsd.xml" />
+    <link type="application/wlwmanifest+xml" rel="wlwmanifest" href="https://www.cnblogs.com/ClownLMe/wlwmanifest.xml" />
+    
+    <script type="application/ld&#x2B;json">
+    {
+      "@context": "https://schema.org",
+      "@type": "BlogPosting",
+      "@id": "https://www.cnblogs.com/ClownLMe/p/19529417",
+      "headline": "langchain 快速入门(四)：搭建强大的AI Agent",
+      "description": "简介 AI Agent 不仅仅是一个能聊天的机器人（如普通的 ChatGPT），而是一个能够感知环境、进行推理、自主决策并调用工具来完成特定任务的智能系统，更够完成更为复杂的AI场景需求。 AI Agent 功能 根据查阅的资料，agent的功能点如下： Agent = LLM &#x2B; 规划 &#x2B; 记忆 ",
+      "image": [
+        
+      ],
+      "author": {
+        "@type": "Person",
+        "@id": "https://www.cnblogs.com/ClownLMe/",
+        "name": "ClownLMe",
+        "url": "https://www.cnblogs.com/ClownLMe/"
+      },
+      "publisher": {
+        "@type": "Organization",
+        "@id": "https://www.cnblogs.com/",
+        "name": "博客园",
+        "url": "https://www.cnblogs.com/"
+      },
+      "datePublished": "2026-01-25T13:28:00.0000000&#x2B;08:00",
+      "dateModified": "2026-01-25T13:28:00.0000000&#x2B;08:00",
+      "wordCount": "6782",
+      "isPartOf": {
+        "@type": "Blog",
+        "@id": "https://www.cnblogs.com/ClownLMe/",
+        "name": "ClownLMe",
+        "publisher": {
+          "@type": "Organization",
+          "@id": "https://www.cnblogs.com/",
+          "name": "博客园"
+        }
+      }
+    }
+    </script>
+
+    <script>
+        var currentBlogId = 832507;
+        var currentBlogApp = 'ClownLMe';
+        var isLogined = false;
+        var isBlogOwner = false;
+        window.skinName = 'BlueSky';
+        var visitorUserId = '';
+        window.hasCustomScript = false;
+        window.cb_enable_mathjax = false;
+        window.mathEngine = 1;
+        window.codeHighlightEngine = 1;
+        window.enableCodeLineNumber = false;
+        window.codeHighlightTheme = 'cnblogs';
+        window.darkModeCodeHighlightTheme = 'vs2015';
+        window.isDarkCodeHighlightTheme = false;
+        window.isDarkModeCodeHighlightThemeDark = true;
+        window.isDisableCodeHighlighter = false;
+        window.enableCodeThemeTypeFollowSystem = false;
+        window.enableMacStyleCodeBlock = false;
+
+    </script>
+        <script>
+            window.currentPostId = 19529417;
+            window.currentPostDateAdded = '2026-01-25 13:28';
+        </script>
+    <script src="https://assets.cnblogs.com/scripts/jquery-3.3.1.min.js"></script>
+    <script src="https://cdn-www.cnblogs.com/js/blog-common.min.js?v=26V4PsnSay1YEKkwIEV9SOBdxCjEZilp4Zc2bQb2cCY"></script>
+    
+</head>
+<body class="skin-bluesky has-navbar">
+    <a name="top"></a>
+        <div id="imagebar" class="imagebar-mobile imagebar-text-mobile formobile">
+                <a href="https://www.doubao.com?channel=cnblogs&amp;source=hw_db_cnblogs&amp;type=lunt&amp;theme=bianc" onclick="countCreativeClicks('M2-字节-豆包')" rel="nofollow">
+                    <img src="https://img2024.cnblogs.com/blog/35695/202506/35695-20250620221146444-645204917.webp" alt="" onload="countCreativeImpressionsOnMobile('M2-字节-豆包')" />
+                    <span id="m2_impression" style="display:none"></span>
+                </a>
+        </div>
+    <div id="top_nav" class="navbar forpc">
+        <nav id="nav_main" class="navbar-main">
+            <ul id="nav_left" class="navbar-list navbar-left">
+                <li class="navbar-branding">
+                    <a href="https://www.cnblogs.com/" title="开发者的网上家园" role="banner">
+                        <img src="//assets.cnblogs.com/logo.svg" alt="博客园logo" />
+                    </a>
+                </li>
+                <li><a href="https://cnblogs.vip/">会员</a></li>
+                <li><a href="https://cnblogs.vip/store">周边</a></li>
+                <li><a href="https://news.cnblogs.com/" onclick="countClicks('nav', 'skin-navbar-news')">新闻</a></li>
+                <li><a href="https://q.cnblogs.com/" onclick="countClicks('nav', 'skin-navbar-q')">博问</a></li>
+                <li><a href="https://ing.cnblogs.com/" onclick="countClicks('nav', 'skin-navbar-ing')">闪存</a></li>
+                <li><a href="https://www.cnblogs.com/cmt/p/18500368">众包</a></li>
+                <li><a href="https://www.cnblogs.com/cmt/p/19316348">赞助商</a></li>
+                <li><a href="https://chat2db-ai.com/" target="_blank" onclick="countClicks('nav', 'skin-navbar-chat2db')">Chat2DB</a></li>
+            </ul>
+            <ul id="nav_right" class="navbar-list navbar-right">
+                <li>
+                    <form id="zzk_search" class="navbar-search dropdown" action="https://zzk.cnblogs.com/s" method="get" role="search">
+                        <input name="w" id="zzk_search_input" placeholder="代码改变世界" type="search" tabindex="3" autocomplete="off" />
+                        <button id="zzk_search_button" onclick="window.navbarSearchManager.triggerActiveOption()">
+                            <img id="search_icon" class="focus-hidden" src="//assets.cnblogs.com/icons/search.svg" alt="搜索" />
+                            <img class="hidden focus-visible" src="//assets.cnblogs.com/icons/enter.svg" alt="搜索" />
+                        </button>
+                        <ul id="navbar_search_options" class="dropdown-menu quick-search-menu">
+                            <li tabindex="0" class="active" onclick="zzkSearch(event, document.getElementById('zzk_search_input').value)">
+                                <div class="keyword-wrapper">
+                                    <img src="//assets.cnblogs.com/icons/search.svg" alt="搜索" />
+                                    <div class="keyword"></div>
+                                </div>
+                                <span class="search-area">所有博客</span>
+                            </li>
+                                    <li tabindex="1" onclick="zzkBlogSearch(event, 'ClownLMe', document.getElementById('zzk_search_input').value)">
+                                        <div class="keyword-wrapper">
+                                            <img src="//assets.cnblogs.com/icons/search.svg" alt="搜索" />
+                                            <div class="keyword"></div>
+                                        </div>
+                                        <span class="search-area">当前博客</span>
+                                    </li>
+                        </ul>
+                    </form>
+                </li>
+                <li id="navbar_login_status" class="navbar-list">
+                    <a class="navbar-user-info navbar-blog" href="https://i.cnblogs.com/EditPosts.aspx?opt=1" alt="写随笔" title="写随笔">
+                        <img id="new_post_icon" class="navbar-icon" src="//assets.cnblogs.com/icons/newpost.svg" alt="写随笔" />
+                    </a>
+                    <a id="navblog-myblog-icon" class="navbar-user-info navbar-blog" href="https://account.cnblogs.com/blogapply" alt="我的博客" title="我的博客">
+                        <img id="myblog_icon" class="navbar-icon" src="//assets.cnblogs.com/icons/myblog.svg" alt="我的博客" />
+                    </a>
+                    <a class="navbar-user-info navbar-message navbar-icon-wrapper" href="https://msg.cnblogs.com/" alt="短消息" title="短消息">
+                        <img id="msg_icon" class="navbar-icon" src="//assets.cnblogs.com/icons/message.svg" alt="短消息" />
+                        <span id="msg_count" style="display: none"></span>
+                    </a>
+                    <a id="navbar_lite_mode_indicator" data-current-page="blog" style="display: none" href="javascript:void(0)" alt="简洁模式" title="简洁模式启用，您在访问他人博客时会使用简洁款皮肤展示">
+                        <img class="navbar-icon" src="//assets.cnblogs.com/icons/lite-mode-on.svg" alt="简洁模式" />
+                    </a>
+                    <div id="user_info" class="navbar-user-info dropdown">
+                        <a class="dropdown-button" href="https://home.cnblogs.com/">
+                            <img id="user_icon" class="navbar-avatar" src="//assets.cnblogs.com/icons/avatar-default.svg" alt="用户头像" />
+                        </a>
+                        <div class="dropdown-menu">
+                            <a id="navblog-myblog-text" href="https://account.cnblogs.com/blogapply">我的博客</a>
+                            <a href="https://home.cnblogs.com/">我的园子</a>
+                            <a href="https://account.cnblogs.com/settings/account">账号设置</a>
+                            <a href="https://vip.cnblogs.com/my">会员中心</a>
+                            <a href="javascript:void(0)" id="navbar_lite_mode_toggle" title="简洁模式会使用简洁款皮肤显示所有博客">
+    简洁模式 <span id="navbar_lite_mode_spinner" class="hide">...</span>
+</a>
+
+                            <a href="javascript:void(0)" onclick="account.logout();">退出登录</a>
+                        </div>
+                    </div>
+                    <a class="navbar-anonymous" href="https://account.cnblogs.com/signup">注册</a>
+                    <a class="navbar-anonymous" href="javascript:void(0);" onclick="account.login()">登录</a>
+                </li>
+            </ul>
+        </nav>
+    </div>
+
+    
+
+    <div id="home">
+<div id="header">
+	<div id="blogTitle">
+        <a id="lnkBlogLogo" href="https://www.cnblogs.com/ClownLMe/"><img id="blogLogo" src="/skins/custom/images/logo.gif" alt="返回主页" /></a>		
+		
+
+<h1><a id="Header1_HeaderTitle" class="headermaintitle HeaderMainTitle" href="https://www.cnblogs.com/ClownLMe">ClownLMe</a>
+</h1>
+<h2></h2>
+
+
+
+
+		
+	</div>
+	<div id="navigator">
+		
+<ul id="navList">
+<li><a id="blog_nav_sitehome" class="menu" href="https://www.cnblogs.com/">
+博客园</a>
+</li>
+<li>
+<a id="blog_nav_myhome" class="menu" href="https://www.cnblogs.com/ClownLMe/">
+首页</a>
+</li>
+<li>
+
+<a id="blog_nav_newpost" class="menu" href="https://i.cnblogs.com/EditPosts.aspx?opt=1">
+新随笔</a>
+</li>
+<li>
+<a id="blog_nav_contact" class="menu" href="https://msg.cnblogs.com/send/ClownLMe">
+联系</a></li>
+<li>
+<a id="blog_nav_rss" class="menu" href="javascript:void(0)" data-rss="https://www.cnblogs.com/ClownLMe/rss/">
+订阅</a>
+<!--<partial name="./Shared/_XmlLink.cshtml" model="Model" /></li>--></li>
+<li>
+<a id="blog_nav_admin" class="menu" href="https://i.cnblogs.com/">
+管理</a>
+</li>
+</ul>
+
+
+		<div class="blogStats">
+			<div id="blog_stats_place_holder"><script>loadBlogStats();</script></div>
+		</div>
+	</div>
+</div>
+<div id="main">
+	<div id="mainContent">
+	<div class="forFlow">
+		<div id="post_detail">
+    
+    <div id="topics">
+        <div class="post">
+            <h1 class = "postTitle">
+                <a id="cb_post_title_url" class="postTitle2 vertical-middle" href="https://www.cnblogs.com/ClownLMe/p/19529417" title="发布于 2026-01-25 13:28">
+    <span role="heading" aria-level="2">langchain 快速入门(四)：搭建强大的AI Agent</span>
+    
+
+</a>
+
+            </h1>
+            <div class="clear"></div>
+            <div class="postBody">
+                <div id="cnblogs_post_body" class="blogpost-body cnblogs-markdown">
+<h1 id="简介">简介</h1>
+<p>AI Agent 不仅仅是一个能聊天的机器人（如普通的 ChatGPT），而是一个能够感知环境、进行推理、自主决策并调用工具来完成特定任务的智能系统，更够完成更为复杂的AI场景需求。</p>
+<h1 id="ai-agent">AI Agent</h1>
+<h3 id="功能">功能</h3>
+<p>根据查阅的资料，agent的功能点如下：<br>
+<mark>Agent = LLM + 规划 + 记忆 + 工具使用</mark><br>
+<strong>LLM：</strong> 用于回答，推理的AI模型<br>
+<strong>记忆：</strong> 短期记忆（对话历史），长期记忆（RAG知识库）<br>
+<strong>规划：</strong> 任务的执行流<br>
+<strong>工具：</strong> Agent可以调用的外部函数</p>
+<h1 id="一个简单的agent">一个简单的Agent</h1>
+<h3 id="案例">案例</h3>
+<p>案例描述：agent可以使用两个工具：1. 记录公司数据的RAG知识库   2. python精确计算器</p>
+<pre><code class="language-python">import os
+from langchain_community.chat_models.tongyi import ChatTongyi
+from langchain_community.embeddings import DashScopeEmbeddings
+from langchain_community.vectorstores import FAISS
+from langchain_core.messages import ToolMessage
+from langchain_core.tools import tool
+from langchain_core.messages import HumanMessage, ToolMessage
+from langchain_core.documents import Document
+from langchain_text_splitters import RecursiveCharacterTextSplitter
+  
+os.environ["DASHSCOPE_API_KEY"] = "api_key"
+  
+@tool
+def calculator(expression: str) -&gt; str:
+&nbsp; &nbsp; """
+&nbsp; &nbsp; 计算数学表达式。需要精确计算时使用。
+&nbsp; &nbsp; 参数:
+&nbsp; &nbsp; &nbsp; &nbsp; expression: 数学算式，如 "2 + 2" 或 "500 * 0.8"。
+&nbsp; &nbsp; 返回:
+&nbsp; &nbsp; &nbsp; &nbsp; str: 计算结果，如 "4.0" 或 "400.0"。
+&nbsp; &nbsp; """
+
+&nbsp; &nbsp; print(f" &nbsp;[🛠️ 工具调用] 计算器正在计算: {expression}")
+&nbsp; &nbsp; try:
+&nbsp; &nbsp; &nbsp; &nbsp; return str(eval(expression))
+&nbsp; &nbsp; except Exception as e:
+&nbsp; &nbsp; &nbsp; &nbsp; return f"计算错误: {e}"
+  
+@tool
+def rag_search(query: str) -&gt; str:
+&nbsp; &nbsp; """
+&nbsp; &nbsp; 从数据库中搜索与查询公司内部相关的文档，包括公司计划名，代号，截止日期等详细信息。
+&nbsp; &nbsp; 参数:
+&nbsp; &nbsp; &nbsp; &nbsp; query (str): 要搜索的查询字符串。
+&nbsp; &nbsp; 返回:
+&nbsp; &nbsp; &nbsp; &nbsp; str: 与查询相关的文档内容。
+&nbsp; &nbsp; """
+  
+&nbsp; &nbsp; # 从RAG数据库中检索文档
+&nbsp; &nbsp; raw_text = """
+&nbsp; &nbsp; 【公司内部机密：代号“深蓝计划”】
+&nbsp; &nbsp; 1. 项目目标：开发一款能听懂猫语的翻译器。
+&nbsp; &nbsp; 2. 核心技术：基于Transformer的“喵声波”分析算法。
+&nbsp; &nbsp; 3. 团队暗号：如果有人问“今天天气怎么样？”，必须回答“我想吃鱼”。
+&nbsp; &nbsp; 4. 截止日期：2026年12月31日。
+&nbsp; &nbsp; 5. 经费预算：仅剩50元人民币，主要用于购买猫条。
+&nbsp; &nbsp; """
+&nbsp; &nbsp; 
+&nbsp; &nbsp; RAG_PATH = "faiss_index"
+
+
+&nbsp; &nbsp; docs = [Document(page_content=raw_text)]
+&nbsp; &nbsp; text_splitter = RecursiveCharacterTextSplitter(chunk_size=25, chunk_overlap=5)
+&nbsp; &nbsp; split_docs = text_splitter.split_documents(docs)
+
+&nbsp; &nbsp; embeddings = DashScopeEmbeddings(model="text-embedding-v1")
+
+&nbsp; &nbsp; if os.path.exists(RAG_PATH):
+&nbsp; &nbsp; &nbsp; &nbsp; print("公司内部数据库已存在")
+&nbsp; &nbsp; &nbsp; &nbsp; ragdb = FAISS.load_local(RAG_PATH, embeddings, allow_dangerous_deserialization=True)
+&nbsp; &nbsp; else:
+&nbsp; &nbsp; &nbsp; &nbsp; print("创建公司内部数据库")
+&nbsp; &nbsp; &nbsp; &nbsp; ragdb = FAISS.from_documents(split_docs, embeddings)
+&nbsp; &nbsp; &nbsp; &nbsp; ragdb.save_local(RAG_PATH)
+&nbsp; &nbsp; return "\n\n".join(doc.page_content for doc in ragdb.similarity_search(query, k=2))
+
+def run_agent(query:str):
+
+&nbsp; &nbsp; #初始化模型
+&nbsp; &nbsp; tool_maps={
+&nbsp; &nbsp; &nbsp; &nbsp; "rag_search": rag_search,
+&nbsp; &nbsp; &nbsp; &nbsp; "calculator": calculator
+&nbsp; &nbsp; }
+
+&nbsp; &nbsp; llm = ChatTongyi(model_name="qwen-plus")
+&nbsp; &nbsp; tool_llm = llm.bind_tools(tools=list(tool_maps.values()))
+
+&nbsp; &nbsp; message = [HumanMessage(content=query)]
+
+&nbsp; &nbsp; for i in range(5):
+&nbsp; &nbsp; 
+&nbsp; &nbsp; &nbsp; &nbsp; print("="*20+"\n第"+str(i+1)+"轮\n"+query+"\n"+"="*20)
+&nbsp; &nbsp; &nbsp; &nbsp; response = tool_llm.invoke(message)
+
+&nbsp; &nbsp; &nbsp; &nbsp; message.append(response)
+&nbsp; &nbsp; &nbsp; &nbsp; print(f"需要调用{len(response.tool_calls)}个方法")
+
+&nbsp; &nbsp; &nbsp; &nbsp; if not response.tool_calls:
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; print("最终结果：" + response.content)
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; return
+
+&nbsp; &nbsp; &nbsp; &nbsp; for tool_call in response.tool_calls:
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; call_id = tool_call["id"]
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; func_name = tool_call["name"]
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; func_args = tool_call["args"]
+
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; # 安全检查：确保模型调用的工具真的存在
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; if func_name in tool_maps:
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; # 运行 Python 函数
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; tool_func = tool_maps[func_name]
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; tool_output = tool_func.invoke(func_args)
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; print("工具调用：" + func_name + "，参数：" + str(func_args) + "，结果：" + tool_output)
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; else:
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; tool_output = f"错误: 工具 {func_name} 不存在。"
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; message.append(
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; ToolMessage(
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; content=tool_output,
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; tool_call_id=call_id,
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; name=func_name,
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; )
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; )
+
+if __name__ == "__main__":
+&nbsp; &nbsp; run_agent("公司计划是什么")
+&nbsp; &nbsp; run_agent("公司的经费预算是多少，如果预算预算提高46%后多少")
+&nbsp; &nbsp; run_agent("今天天气真好")
+</code></pre>
+<h3 id="代码解析">代码解析</h3>
+<p>要实现复杂的工具调用，必须实现AI的多轮对话，在langchain框架中，提供了大量的prompt模板，让开发者不需要过度想一些基础的prompt实现。</p>
+<p>上面代码的执行流程如下：<br>
+<strong>初始化2个工具函数-&gt;绑定LLM与工具-&gt;通过循环进行多轮对话</strong></p>
+<h5 id="初始化2个工具函数">初始化2个工具函数</h5>
+<p>这里的<code>rag_search</code>上一篇文章讲了具体实现，这里就不废话了。</p>
+<pre><code class="language-python">@tool
+def calculator(expression: str) -&gt; str:
+&nbsp; &nbsp; """
+&nbsp; &nbsp; 计算数学表达式。需要精确计算时使用。
+&nbsp; &nbsp; 参数:
+&nbsp; &nbsp; &nbsp; &nbsp; expression: 数学算式，如 "2 + 2" 或 "500 * 0.8"。
+&nbsp; &nbsp; 返回:
+&nbsp; &nbsp; &nbsp; &nbsp; str: 计算结果，如 "4.0" 或 "400.0"。
+&nbsp; &nbsp; """
+
+&nbsp; &nbsp; print(f" &nbsp;[🛠️ 工具调用] 计算器正在计算: {expression}")
+&nbsp; &nbsp; try:
+&nbsp; &nbsp; &nbsp; &nbsp; return str(eval(expression))
+&nbsp; &nbsp; except Exception as e:
+&nbsp; &nbsp; &nbsp; &nbsp; return f"计算错误: {e}"
+  
+@tool
+def rag_search(query: str) -&gt; str:
+&nbsp; &nbsp; ......
+</code></pre>
+<p>工具函数的格式，主要有3个方面：</p>
+<ul>
+<li><strong>工具修饰：</strong> 利用<code>@tool</code>修饰器修饰</li>
+<li><strong>函数的描述：</strong> 这里放函数的描述，大模型通过这个描述定位工具，因此这部分<mark>必须详细</mark>，可以参考上面:
+<ol>
+<li>函数的描述</li>
+<li>函数的参数+例子</li>
+<li>函数的返回+例子</li>
+</ol>
+</li>
+<li><strong>工具的实现：</strong> 返回值要是<mark>字符串</mark><br>
+如下：</li>
+</ul>
+<pre><code class="language-python">@tool
+def func_name(arg) -&gt; str:
+	"""
+	描述
+	"""
+	......
+</code></pre>
+<h5 id="绑定llm与工具">绑定LLM与工具</h5>
+<p>工具的绑定非常的简单，只需要简单的<code>bind_tools</code>类方法就行</p>
+<pre><code class="language-python">tool_maps={
+&nbsp; &nbsp; &nbsp; &nbsp; "rag_search": rag_search,
+&nbsp; &nbsp; &nbsp; &nbsp; "calculator": calculator
+&nbsp; &nbsp; }
+
+&nbsp; &nbsp; llm = ChatTongyi(model_name="qwen-plus")
+&nbsp; &nbsp; tool_llm = llm.bind_tools(tools=list(tool_maps.values()))
+</code></pre>
+<h5 id="通过循环进行多轮对话重点">通过循环进行多轮对话（重点）</h5>
+<p>工具的调用流程：<br>
+<strong>提示词-&gt;LLM-&gt;要调用的工具-&gt;LLM-&gt;结果</strong></p>
+<pre><code class="language-python">	message = [HumanMessage(content=query)]
+
+&nbsp; &nbsp; for i in range(5):
+&nbsp; &nbsp; 
+&nbsp; &nbsp; &nbsp; &nbsp; print("="*20+"\n第"+str(i+1)+"轮\n"+query+"\n"+"="*20)
+&nbsp; &nbsp; &nbsp; &nbsp; response = tool_llm.invoke(message)
+
+&nbsp; &nbsp; &nbsp; &nbsp; message.append(response)
+&nbsp; &nbsp; &nbsp; &nbsp; print(f"需要调用{len(response.tool_calls)}个方法")
+
+&nbsp; &nbsp; &nbsp; &nbsp; if not response.tool_calls:
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; print("最终结果：" + response.content)
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; return
+
+&nbsp; &nbsp; &nbsp; &nbsp; for tool_call in response.tool_calls:
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; call_id = tool_call["id"]
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; func_name = tool_call["name"]
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; func_args = tool_call["args"]
+
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; # 安全检查：确保模型调用的工具真的存在
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; if func_name in tool_maps:
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; # 运行 Python 函数
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; tool_func = tool_maps[func_name]
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; tool_output = tool_func.invoke(func_args)
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; print("工具调用：" + func_name + "，参数：" + str(func_args) + "，结果：" + tool_output)
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; else:
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; tool_output = f"错误: 工具 {func_name} 不存在。"
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; message.append(
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; ToolMessage(
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; content=tool_output,
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; tool_call_id=call_id,
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; name=func_name,
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; )
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; )
+</code></pre>
+<p>在调用<code>bind_tools</code>方法后，大模型的返回对象会多出<code>tool_calls</code>字段的数组数据，用于存放需要调用工具的参数，函数名，在调用函数后，将调用函数的结果封装成<code>ToolMessage</code>传入，再继续调用大模型。</p>
+<p><mark><strong>注意：在调用LLM时可能LLM会不断要求Tool，由此可能发生死循环，因此要限制循环次数。</strong></mark></p>
+<h1 id="安全与审思">安全与审思</h1>
+<h3 id="风险评估">风险评估</h3>
+<p>近些年，ai提示词注入频频发生，根据上面的案例：</p>
+<pre><code class="language-python">@tool
+def calculator(expression: str) -&gt; str:
+&nbsp; &nbsp; """
+&nbsp; &nbsp; 计算数学表达式。需要精确计算时使用。
+&nbsp; &nbsp; 参数:
+&nbsp; &nbsp; &nbsp; &nbsp; expression: 数学算式，如 "2 + 2" 或 "500 * 0.8"。
+&nbsp; &nbsp; 返回:
+&nbsp; &nbsp; &nbsp; &nbsp; str: 计算结果，如 "4.0" 或 "400.0"。
+&nbsp; &nbsp; """
+
+&nbsp; &nbsp; print(f" &nbsp;[🛠️ 工具调用] 计算器正在计算: {expression}")
+&nbsp; &nbsp; try:
+&nbsp; &nbsp; &nbsp; &nbsp; return str(eval(expression))
+&nbsp; &nbsp; except Exception as e:
+&nbsp; &nbsp; &nbsp; &nbsp; return f"计算错误: {e}"
+</code></pre>
+<p>LLM在调用这个工具时使用了<code>eval</code>，这就造成了风险注入点，不法分子可能利用这个漏洞，获取电脑权限。</p>
+<h3 id="修复思路">修复思路</h3>
+<p>修复上面漏洞，可以参考以下几个思路：</p>
+<ol>
+<li>通过指令提示词，让LLM忽略，并终止危险代码调用该函数</li>
+<li>在函数中用正则匹配危险代码，或设置白名单</li>
+<li>替换eval函数，将其换为更加安全的方法，如手动写死运算</li>
+</ol>
+<p><strong>如果❤喜欢❤本系列教程，就点个关注吧，后续不定期更新~</strong></p>
+
+</div>
+<div class="clear"></div>
+<div id="blog_post_info_block" role="contentinfo" class="post-meta-container">
+    <div id="blog_post_info"></div>
+    <div class="clear"></div>
+    <div id="post_next_prev"></div>
+</div>
+            </div>
+            <div class="postDesc">posted @ 
+<span id="post-date" data-last-update-days="0" data-date-updated="2026-01-25 13:28">2026-01-25 13:28</span>&nbsp;
+<a href="https://www.cnblogs.com/ClownLMe">ClownLMe</a>&nbsp;
+阅读(<span id="post_view_count">20</span>)&nbsp;
+评论(<span id="post_comment_count">0</span>)&nbsp;
+&nbsp;
+<a href="javascript:void(0)" onclick="AddToWz(19529417);return false;">收藏</a>&nbsp;
+<a href="javascript:void(0)" onclick="reportManager.report({ currentUserId: '', targetType: 'blogPost', targetId: '19529417', targetLink: 'https://www.cnblogs.com/ClownLMe/p/19529417', title: 'langchain 快速入门(四)：搭建强大的AI Agent' })">举报</a>
+</div>
+        </div>
+	    
+	    
+    </div><!--end: topics 文章、评论容器-->
+</div>
+<script>
+    var cb_entryId = 19529417, cb_entryCreatedDate = '2026-01-25 13:28', cb_postType = 1, cb_postTitle = 'langchain 快速入门(四)：搭建强大的AI Agent';
+    var allowComments = true, cb_blogId = 832507, cb_blogApp = 'ClownLMe', cb_blogUserGuid = '5474e6a8-d7da-4283-dfd5-08d93c474077';
+    mermaidRender.render()
+    markdown_highlight()
+    zoomManager.apply("#cnblogs_post_body img:not(.code_img_closed):not(.code_img_opened)");    
+</script>
+<a id="!comments"></a>
+<div id="blog-comments-placeholder"></div>
+<div id="comment_form" class="commentform">
+    <a name="commentform"></a>
+    <div id="divCommentShow"></div>
+    <div id="comment_nav">
+        <div class="comment-nav-right">
+            <span id="span_refresh_tips"></span><a href="#" onclick="return RefreshPage();">刷新页面</a><a href="#top">返回顶部</a>
+        </div>
+    </div>
+    <div id="comment_form_container"></div>
+    <div class="ad_text_commentbox" id="ad_text_under_commentbox"></div>
+        <div id="cnblogs_ch"></div>
+    <div id="opt_under_post"></div>
+        <div id="blog_c1" class="under-post-card below-post-card">
+            <a href="https://dis.chatdesks.cn/chatdesk/jmcnblogs.html" rel="nofollow" target="_blank" onclick="countCreativeClicks('C1-jimeng')">
+                <img src="https://img2024.cnblogs.com/blog/35695/202512/35695-20251205171919392-144975027.jpg" onload="countCreativeImpressions('C1-jimeng')" alt="" style="width:300px!important;height:250px!important;min-width:300px!important;max-width:300px!important;" />
+                <span id="c1_impression" style="display:none"></span>
+            </a>
+        </div>
+    <div id="under_post_card1"></div>
+    <div id="related_posts_card"></div>
+    <div id="under_post_card2"></div>
+    <div id="HistoryToday" class="under-post-card below-post-card"></div>
+    <script type="text/javascript">
+        var commentManager = new blogCommentManager();
+        commentManager.renderComments(0);
+        fixPostBody();
+        window.footnoteTipManager.generateFootnoteTips();
+
+            window.tocManager.displayDisableTocTips = false;
+            window.tocManager.generateToc();
+            
+            setTimeout(function() { countViews(cb_blogId, cb_entryId); }, 50);
+            
+            deliverT2();
+            deliverC1C2();
+            loadNewsAndKb();
+            
+            LoadPostCategoriesTags(cb_blogId, cb_entryId);
+            
+            LoadPostInfoBlock(cb_blogId, cb_entryId, cb_blogApp, cb_blogUserGuid);
+            GetPrevNextPost(cb_entryId, cb_blogId, cb_entryCreatedDate, cb_postType);
+            loadOptUnderPost();
+            GetHistoryToday(cb_blogId, cb_blogApp, cb_entryCreatedDate);
+                </script>
+</div>
+
+	</div>
+	</div>
+	<div id="sideBar">
+		<div id="sideBarMain">
+			<div id="sidebar_news" class="newsItem">
+    <h3 class="catListTitle">公告</h3>
+<div id="blog-news" class="sidebar-news">
+    <div id="sidebar_news_container">
+    </div>
+</div>
+<script>loadBlogNews();</script>
+
+
+</div>
+			<div id="blog-calendar" style="display:none"></div><script>loadBlogDefaultCalendar();</script>			
+			<div id="leftcontentcontainer">
+				<div id="blog-sidecolumn"></div>
+					<script>loadBlogSideColumn()</script>
+			</div>			
+		</div>
+	</div>
+	<div class="clear"></div>
+	</div>
+	<div class="clear"></div>
+	<div id="footer">
+		<a href="https://www.cnblogs.com/" id="footer_site_link" class="footer-brand">博客园</a>
+<span class="footer-copyright"> &nbsp;&copy;&nbsp; 2004-2026</span>
+<br /><span class="footer-icp">
+    <a target="_blank" href="http://www.beian.gov.cn/portal/registerSystemInfo?recordcode=33010602011771"><img src="//assets.cnblogs.com/images/ghs.png" />浙公网安备 33010602011771号</a>
+    <a href="https://beian.miit.gov.cn" target="_blank">浙ICP备2021040463号-3</a>
+</span>
+
+
+
+	</div>
+</div>
+
+
+
+    
+
+    <input type="hidden" id="antiforgery_token" value="CfDJ8E2WNf1AXE5GolAm9rsxlHAtoxhrRaw6rfikzA88F4QJxiaaJz3P3xlE8AP2z1skqKKNTA0R9yYaAUDzzP7DgnlVDg0yKbRHGqaL4w6ac_lpCj6qrQyc1ZsAcZRcn8DcgyNkgYVSDmYkHN65JizoQPY" />
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-M95P3TTWJZ"></script>
+<script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag() { dataLayer.push(arguments); }
+    gtag('js', new Date());
+    gtag('config', 'G-M95P3TTWJZ');
+</script>
+<script defer src="https://hm.baidu.com/hm.js?866c9be12d4a814454792b1fd0fed295"></script>
+</body>
+</html>
