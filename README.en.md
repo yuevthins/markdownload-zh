@@ -47,7 +47,20 @@ English | [简体中文](README.md)
 
 ## Quick Start
 
-### Install (Dev Build)
+### Option 1: Direct Install (Recommended, no coding required)
+
+1. Download `markdownload-zh-extension.zip` from the [latest Release](https://github.com/yuevthins/markdownload-zh/releases)
+2. Unzip to any folder
+3. Open Chrome, navigate to `chrome://extensions/`
+4. Enable **"Developer mode"** (top right toggle)
+5. Click **"Load unpacked"** (top left)
+6. Select the unzipped folder
+
+> Once installed, the MarkDownload icon appears in the Chrome toolbar. Pin it by clicking the puzzle icon 📌.
+
+### Option 2: Build from Source
+
+Requires [Node.js](https://nodejs.org/) 18+:
 
 ```bash
 git clone https://github.com/yuevthins/markdownload-zh.git
@@ -56,18 +69,22 @@ npm install
 npm run build
 ```
 
-Then in Chrome:
-1. Open `chrome://extensions/`
-2. Enable "Developer mode"
-3. Click "Load unpacked"
-4. Select the `.output/chrome-mv3/` directory
+Then follow Option 1 steps 3-6, selecting the `.output/chrome-mv3/` directory.
 
 ### Usage
 
-1. Open any web page
-2. Click the extension icon
-3. Preview Markdown / edit title
-4. Click **Download** or **Copy**
+| Step | Action | Notes |
+|:----:|:-------|:------|
+| 1 | Open any web page | Works on most sites; `chrome://` system pages are excluded |
+| 2 | Click the MarkDownload icon | The extension auto-extracts the main content |
+| 3 | Preview Markdown | Edit the filename directly in the title bar |
+| 4 | Click **⬇ Download** or **📋 Copy** | Downloads as `.md` to your default directory; or paste into Obsidian |
+
+**FAQ:**
+
+- **Images missing?** Some sites use lazy-loading — scroll through the page first, then clip
+- **Content incomplete?** Click "Show full article" before using the extension
+- **Where's the file?** Saved to Chrome's default download directory, named after the article title
 
 ## Output Format
 

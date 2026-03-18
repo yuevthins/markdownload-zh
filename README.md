@@ -47,7 +47,20 @@
 
 ## 快速开始
 
-### 安装（开发版）
+### 方式一：直接安装（推荐，无需编程）
+
+1. [下载最新 Release](https://github.com/yuevthins/markdownload-zh/releases) 中的 `markdownload-zh-extension.zip`
+2. 解压到任意文件夹
+3. 打开 Chrome，地址栏输入 `chrome://extensions/`
+4. 打开右上角 **「开发者模式」** 开关
+5. 点击左上角 **「加载已解压的扩展程序」**
+6. 选择刚才解压的文件夹
+
+> 安装成功后，Chrome 工具栏会出现 MarkDownload 图标。建议点击拼图图标 📌 将其固定。
+
+### 方式二：从源码构建
+
+需要 [Node.js](https://nodejs.org/) 18+ 环境：
 
 ```bash
 git clone https://github.com/yuevthins/markdownload-zh.git
@@ -56,18 +69,22 @@ npm install
 npm run build
 ```
 
-然后在 Chrome 中：
-1. 打开 `chrome://extensions/`
-2. 开启「开发者模式」
-3. 点击「加载已解压的扩展」
-4. 选择 `.output/chrome-mv3/` 目录
+构建完成后，按方式一的步骤 3-6 操作，选择 `.output/chrome-mv3/` 目录。
 
-### 使用
+### 使用方法
 
-1. 打开任意网页
-2. 点击扩展图标
-3. 预览 Markdown / 编辑标题
-4. 点击 **下载** 或 **复制**
+| 步骤 | 操作 | 说明 |
+|:----:|:-----|:-----|
+| 1 | 打开任意网页 | 支持绝大多数网站，`chrome://` 等系统页面除外 |
+| 2 | 点击工具栏的 MarkDownload 图标 | 扩展会自动提取正文内容 |
+| 3 | 预览 Markdown | 可在标题栏直接编辑文件名 |
+| 4 | 点击 **⬇ 下载** 或 **📋 复制** | 下载为 `.md` 文件到默认下载目录；或复制到剪贴板后粘贴到 Obsidian |
+
+**常见问题：**
+
+- **图片没显示？** 部分站点使用懒加载，请先滚动页面让图片加载完再剪藏
+- **内容不完整？** 对于需要展开的长文，先点击「展开全文」再使用扩展
+- **下载到哪了？** 默认保存到 Chrome 的下载目录，文件名为文章标题
 
 ## 输出格式
 
