@@ -19,7 +19,9 @@ English | [简体中文](README.md)
 
 <div align="center">
 
-<video src="https://github.com/yuevthins/markdownload-zh/raw/main/docs/tutorial.mp4" width="720" controls muted></video>
+<video src="https://raw.githubusercontent.com/yuevthins/markdownload-zh/main/docs/tutorial.mp4" width="720" controls muted>
+  <a href="https://raw.githubusercontent.com/yuevthins/markdownload-zh/main/docs/tutorial.mp4">Click to watch tutorial</a>
+</video>
 
 *Open page → Click icon → Preview Markdown → Download*
 

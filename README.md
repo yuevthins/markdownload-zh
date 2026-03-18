@@ -19,9 +19,9 @@
 
 <div align="center">
 
-https://github.com/user-attachments/assets/tutorial.mp4
-
-<video src="https://github.com/yuevthins/markdownload-zh/raw/main/docs/tutorial.mp4" width="720" controls muted></video>
+<video src="https://raw.githubusercontent.com/yuevthins/markdownload-zh/main/docs/tutorial.mp4" width="720" controls muted>
+  <a href="https://raw.githubusercontent.com/yuevthins/markdownload-zh/main/docs/tutorial.mp4">点击观看教程视频</a>
+</video>
 
 *打开网页 → 点击图标 → 预览 Markdown → 一键下载*
 
