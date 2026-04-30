@@ -10,11 +10,13 @@ import type { SiteAdapter } from '../types';
 // 导入适配器
 import { wechatAdapter } from './adapters/wechat';
 import { redditAdapter } from './adapters/reddit';
+import { discourseAdapter } from './adapters/discourse';
 import { qqNewsAdapter } from './adapters/qq-news';
 import { tiktokShopAdapter } from './adapters/tiktok-shop';
 import { csdnAdapter } from './adapters/csdn';
 import { zhihuAdapter } from './adapters/zhihu';
 import { feishuAdapter } from './adapters/feishu';
+import { aiSiteAdapters } from './adapters/ai-sites';
 import { chineseTechAdapters } from './adapters/chinese-tech';
 import { newsAdapters } from './adapters/news';
 import { techBlogAdapters } from './adapters/tech-blogs';
@@ -27,11 +29,13 @@ import { simpleAdapters } from './adapters/_simple';
 // 1. 复杂站点（有自定义逻辑）
 registerAdapter(wechatAdapter);
 registerAdapter(redditAdapter);
+registerAdapter(discourseAdapter);
 registerAdapter(qqNewsAdapter);
 registerAdapter(tiktokShopAdapter);
 registerAdapter(csdnAdapter);
 registerAdapter(zhihuAdapter);
 registerAdapter(feishuAdapter);
+registerAdapters(aiSiteAdapters);
 
 // 2. 中文技术社区
 registerAdapters(chineseTechAdapters);

@@ -14,6 +14,7 @@
     "fetch-fixtures:browser": "npx tsx scripts/fetch-fixtures-playwright.ts",
     "fetch-fixtures:browser:headed": "npx tsx scripts/fetch-fixtures-playwright.ts --headed",
     "test:extraction": "npx tsx scripts/run-extraction-tests.ts",
+    "test:ai-sites": "npx tsx scripts/run-ai-sites-coverage.ts",
     "lint": "eslint . --ext .ts,.tsx",
     "format": "prettier --write ."
   },
