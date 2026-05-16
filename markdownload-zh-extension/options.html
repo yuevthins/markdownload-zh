@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MarkDownload 设置</title>
+  <script type="module" crossorigin src="/chunks/options-5_fZDTpO.js"></script>
+  <link rel="modulepreload" crossorigin href="/chunks/settings-D3uYmObg.js">
+  <link rel="stylesheet" crossorigin href="/assets/options-BTACHGYE.css">
+</head>
+<body>
+  <main class="container">
+    <header class="page-header">
+      <h1>MarkDownload 设置</h1>
+      <p class="subtitle">选择剪藏模式，配置 Obsidian vault</p>
+    </header>
+
+    <section class="card" aria-labelledby="mode-title">
+      <h2 id="mode-title">交互模式</h2>
+      <p class="hint">点击工具栏图标后的行为</p>
+
+      <fieldset class="mode-group">
+        <legend class="visually-hidden">交互模式</legend>
+
+        <label class="mode-option">
+          <input type="radio" name="mode" value="preview" id="mode-preview">
+          <span class="mode-label">
+            <strong>预览模式（默认）</strong>
+            <span class="mode-desc">弹窗预览 Markdown，手动下载或复制</span>
+          </span>
+        </label>
+
+        <label class="mode-option">
+          <input type="radio" name="mode" value="obsidian" id="mode-obsidian">
+          <span class="mode-label">
+            <strong>Obsidian 模式</strong>
+            <span class="mode-desc">弹窗预览，通过 obsidian:// URI 直接保存到 vault</span>
+          </span>
+        </label>
+
+        <label class="mode-option">
+          <input type="radio" name="mode" value="quick" id="mode-quick">
+          <span class="mode-label">
+            <strong>快速模式</strong>
+            <span class="mode-desc">点击图标后无弹窗直接保存，badge 反馈</span>
+          </span>
+        </label>
+      </fieldset>
+    </section>
+
+    <section class="card" aria-labelledby="vault-title">
+      <h2 id="vault-title">Obsidian Vault 配置</h2>
+      <p class="hint">仅在 Obsidian / 快速模式下生效</p>
+
+      <div class="field">
+        <label for="vault-name">Vault 名称</label>
+        <input type="text" id="vault-name" placeholder="例如：Notes" autocomplete="off">
+        <p class="field-hint">Obsidian 左下角显示的 vault 名，区分大小写</p>
+      </div>
+
+      <div class="field">
+        <label for="vault-folder">目标文件夹（Inbox）</label>
+        <input type="text" id="vault-folder" placeholder="Inbox" autocomplete="off">
+        <p class="field-hint">vault 内的相对路径，留空则放到 vault 根目录</p>
+      </div>
+    </section>
+
+    <footer class="page-footer" aria-live="polite">
+      <span id="save-status" class="save-status"></span>
+    </footer>
+  </main>
+
+</body>
+</html>

@@ -38,12 +38,15 @@
 
 ## 核心特性
 
+- **三种模式** — 预览模式（默认）/ Obsidian 模式 / 快速模式，在设置页自由切换
 - **一键剪藏** — 点击图标，自动提取正文、生成 Markdown、下载到本地
+- **快速模式** — 无弹窗，点击图标后台直接保存，✓ 绿色 badge 表示成功
+- **Obsidian 集成** — 配置 Vault 后通过 `obsidian://` 协议直接保存到笔记库
 - **62 个站点适配** — 微信公众号 / 知乎 / CSDN / 掘金 / 腾讯新闻 / Reddit 等
 - **Obsidian Frontmatter** — 自动生成 `title` / `id` / `created` / `tags` / `source` 元数据
 - **智能图片处理** — 13 种懒加载属性自动识别，相对路径自动转绝对路径
 - **实时预览** — 下载前预览完整 Markdown 内容，支持编辑标题
-- **隐私优先** — 仅 `activeTab` + `scripting` + `downloads` 三项权限
+- **隐私优先** — 仅 `activeTab` + `scripting` + `downloads` + `storage` 四项权限
 
 ## 快速开始
 
