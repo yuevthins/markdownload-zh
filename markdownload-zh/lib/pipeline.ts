@@ -1,13 +1,18 @@
 /**
  * 主管线 orchestrator
  *
- * 组合四个阶段：Preprocess → Extract → Convert → Format
+ * 阶段：Preprocess → Extract → Format
+ *
+ * defuddle 引擎统一在 Extract 阶段产出 Markdown：
+ *  - 通用页面：defuddle 直接提取 + 转换
+ *  - customExtract / 后备：返回 HTML 后由 defuddle 的 htmlToMarkdown 转换
+ *
+ * 因此管线不再需要单独的 Convert 阶段。
  */
 import type { PipelineResult } from './types';
 import { getSiteAdapter } from './sites';
 import { preprocessDOM } from './preprocess';
 import { extractContent } from './extract';
-import { convertToMarkdown } from './convert';
 import { formatMarkdown } from './format';
 import { detectDocFramework } from './sites/adapters/generic-docs';
 
@@ -63,12 +68,8 @@ export async function runPipeline(
       return { success: false, error: 'NO_CONTENT' };
     }
 
-    // Stage 3: Convert（传入 url 用于懒加载图片相对路径归一化）
-    const markdown = convertToMarkdown(extracted.html, url);
-    mark('pl_convert');
-
-    // Stage 4: Format
-    const formatted = formatMarkdown(markdown);
+    // Stage 3: Format
+    const formatted = formatMarkdown(extracted.markdown);
     mark('pl_format');
 
     return {

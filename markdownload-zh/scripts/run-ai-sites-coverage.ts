@@ -12,7 +12,6 @@ import { fileURLToPath } from 'node:url';
 import { JSDOM, VirtualConsole } from 'jsdom';
 import { preprocessDOM } from '../lib/preprocess/index';
 import { extractContent } from '../lib/extract/index';
-import { convertToMarkdown } from '../lib/convert/index';
 import { formatMarkdown } from '../lib/format/index';
 import { getSiteAdapter } from '../lib/sites/index';
 
@@ -322,7 +321,7 @@ async function extractCase(testCase: Case, mode: Mode): Promise<CaseResult> {
   try {
     await preprocessDOM(doc, testCase.url, adapter);
     const extracted = await extractContent(doc, testCase.url, adapter);
-    const markdown = formatMarkdown(convertToMarkdown(extracted?.html || '', testCase.url));
+    const markdown = formatMarkdown(extracted?.markdown || '');
     const title = clean(extracted?.title || pageTitle || '');
     const plain = clean(markdown.replace(/!\[[^\]]*\]\([^)]*\)/g, ' ').replace(/\[[^\]]+\]\([^)]*\)/g, ' '));
 

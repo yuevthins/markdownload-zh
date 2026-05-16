@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { JSDOM } from 'jsdom';
-import { convertToMarkdown } from '../../convert';
+import { htmlToMarkdown } from '../../extract/defuddle';
 import { extractDiscourseMainPost } from './discourse';
 
 const URL = 'https://linux.do/t/topic/1782304';
@@ -103,7 +103,7 @@ describe('extractDiscourseMainPost', () => {
     `);
 
     const result = extractDiscourseMainPost(doc, URL);
-    const markdown = convertToMarkdown(result?.content || '', URL);
+    const markdown = htmlToMarkdown(result?.content || '', URL);
 
     expect(markdown).toContain('正文');
     expect(markdown).toContain('![示例图](https://cdn.example.com/original/a.webp)');

@@ -8,17 +8,13 @@ import { JSDOM } from 'jsdom';
 import fs from 'fs';
 import path from 'path';
 
-// 直接导入 pipeline 各阶段进行集成测试
-import { preprocessDOM } from '../../lib/preprocess';
-import { extractContent } from '../../lib/extract';
-import { convertToMarkdown } from '../../lib/convert';
-import { formatMarkdown } from '../../lib/format';
+import { runPipeline } from '../../lib/pipeline';
 import { getSiteAdapter } from '../../lib/sites';
 
 const FIXTURES_DIR = path.resolve(__dirname, '../fixtures');
 
 /**
- * 简化版 pipeline（在 Node.js/jsdom 中运行）
+ * 通过完整 pipeline 提取（保持与历史断言形状兼容）。
  */
 async function extractFromHtml(html: string, url: string): Promise<{
   success: boolean;
@@ -27,34 +23,14 @@ async function extractFromHtml(html: string, url: string): Promise<{
   error?: string;
 }> {
   const dom = new JSDOM(html, { url });
-  const doc = dom.window.document;
-
-  // 获取适配器
-  const adapter = getSiteAdapter(url, doc);
-
-  // Stage 1: Preprocess
-  try {
-    await preprocessDOM(doc, url, adapter);
-  } catch (e) {
-    console.warn('Preprocess failed:', e);
+  const result = await runPipeline(dom.window.document, url);
+  if (!result.success || !result.data) {
+    return { success: false, title: '', markdown: '', error: result.error };
   }
-
-  // Stage 2: Extract
-  const extracted = await extractContent(doc, url, adapter);
-  if (!extracted) {
-    return { success: false, title: '', markdown: '', error: 'NO_CONTENT' };
-  }
-
-  // Stage 3: Convert
-  const markdown = convertToMarkdown(extracted.html);
-
-  // Stage 4: Format
-  const formatted = formatMarkdown(markdown);
-
   return {
     success: true,
-    title: extracted.title || 'Untitled',
-    markdown: formatted,
+    title: result.data.title,
+    markdown: result.data.markdown,
   };
 }
 
