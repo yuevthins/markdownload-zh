@@ -1,46 +1,12 @@
 import { generateId, formatDate, formatDateTime } from '@/utils/id';
 import { sanitizeFilename } from '@/utils/filename';
 import { renderTemplate, DEFAULT_TEMPLATE } from '@/utils/template';
-import type { TemplateData, ExtractResult, ExtractedData } from '@/types';
+import type { TemplateData, ExtractedData } from '@/types';
 import { getSettings, DEFAULT_SETTINGS, type Settings } from '@/utils/settings';
 import { buildObsidianUri } from '@/utils/obsidian-uri';
+import { clipTab } from '@/lib/clip-flow';
 
 const MARKDOWN_MIME = 'text/markdown;charset=utf-8';
-
-// 提取结果轮询：飞书等虚拟滚动站点需要最长约 25s（HARD_CEILING_MS）
-const POLL_INTERVAL_MS = 200;
-const POLL_TIMEOUT_MS = 30_000;
-const MAX_POLL_ATTEMPTS = Math.floor(POLL_TIMEOUT_MS / POLL_INTERVAL_MS);
-
-// ---------- 阶段打点（诊断用）----------
-const popupMarks: Record<string, number> = {};
-const mark = (name: string) => {
-  popupMarks[name] = Date.now();
-};
-mark('popup_ready');
-
-function printPerf(extractorMarks?: Record<string, number>): void {
-  const all: Record<string, number> = { ...popupMarks, ...(extractorMarks || {}) };
-  const entries = Object.entries(all).sort((a, b) => a[1] - b[1]);
-  if (entries.length === 0) return;
-  const t0 = entries[0][1];
-  const rows = entries.map(([stage, t], i) => ({
-    stage,
-    'at (ms)': t - t0,
-    'delta (ms)': i === 0 ? 0 : t - entries[i - 1][1],
-  }));
-  console.log('[MD-perf] 阶段耗时（ms，从第一个标记起算）');
-  console.table(rows);
-}
-
-const RESTRICTED_PROTOCOLS = [
-  'chrome://',
-  'chrome-extension://',
-  'edge://',
-  'brave://',
-  'about:',
-  'file://',
-];
 
 // DOM 元素
 const loadingEl = document.getElementById('loading')!;
@@ -65,7 +31,6 @@ let currentData: ExtractedData | null = null;
 let currentSettings: Settings = DEFAULT_SETTINGS;
 
 async function init() {
-  mark('init_start');
   showLoading();
 
   // 生成会话级 ID 和日期（整个会话只生成一次）
@@ -88,92 +53,15 @@ async function init() {
 
   try {
     const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
-    mark('tab_queried');
 
     if (!tab.id || !tab.url) {
       throw new Error('无法获取当前标签页');
     }
 
-    // 检查是否为 chrome:// 或其他受限页面
-    if (RESTRICTED_PROTOCOLS.some((p) => tab.url!.startsWith(p))) {
-      throw new Error('无法在此页面使用扩展');
-    }
+    const result = await clipTab(tab.id, tab.url);
 
-    // 生成唯一 requestId 防止读取到过期结果
-    const requestId = `${Date.now()}-${Math.random().toString(36).slice(2, 6)}`;
-
-    // 清除旧结果 + 写入 requestId
-    await chrome.scripting.executeScript({
-      target: { tabId: tab.id },
-      func: (rid: string) => {
-        delete window.__markdownload_extracted;
-        window.__markdownload_requestId = rid;
-      },
-      args: [requestId],
-    });
-    mark('clear_done');
-
-    // 注入 content script 文件（包含 Readability.js 和 Turndown）
-    await chrome.scripting.executeScript({
-      target: { tabId: tab.id },
-      files: ['extractor.js'],
-    });
-    mark('inject_done');
-
-    // 等待提取结果：优先事件驱动，保留轮询作 fallback
-    const waitForResult = async (): Promise<ExtractResult | undefined> => {
-      const readResult = async (): Promise<ExtractResult | null> => {
-        const results = await chrome.scripting.executeScript({
-          target: { tabId: tab.id! },
-          func: (expectedId: string) => {
-            const result = window.__markdownload_extracted;
-            if (result && result.requestId === expectedId) {
-              delete window.__markdownload_extracted;
-              delete window.__markdownload_requestId;
-              return result;
-            }
-            return null;
-          },
-          args: [requestId],
-        });
-        return results[0]?.result as ExtractResult | null;
-      };
-
-      return new Promise<ExtractResult | undefined>((resolve) => {
-        let settled = false;
-        const settle = (r: ExtractResult | undefined) => {
-          if (settled) return;
-          settled = true;
-          chrome.runtime.onMessage.removeListener(messageListener);
-          resolve(r);
-        };
-
-        // 事件驱动：监听 extractor 完成信号
-        const messageListener = (msg: unknown) => {
-          const m = msg as { type?: string; requestId?: string } | null;
-          if (m?.type === '__markdownload_done' && m?.requestId === requestId) {
-            readResult().then((r) => settle(r || undefined));
-          }
-        };
-        chrome.runtime.onMessage.addListener(messageListener);
-
-        (async () => {
-          for (let i = 0; i < MAX_POLL_ATTEMPTS && !settled; i++) {
-            const r = await readResult();
-            if (r) { settle(r); return; }
-            await new Promise((w) => setTimeout(w, POLL_INTERVAL_MS));
-          }
-          settle(undefined);
-        })();
-      });
-    };
-
-    const result = await waitForResult();
-    mark('result_received');
-
-    if (!result || !result.success || !result.data) {
-      printPerf(result?._perf);
-      throw new Error(result?.error?.message || '提取失败');
+    if (!result.success) {
+      throw new Error(result.error?.message || '提取失败');
     }
 
     currentData = result.data;
@@ -181,10 +69,7 @@ async function init() {
 
     titleInput.value = currentData.title;
     updatePreview();
-    mark('preview_rendered');
     updateStatus(`来源: ${new URL(currentData.url).hostname}`);
-
-    printPerf(result._perf);
   } catch (error) {
     showError(error instanceof Error ? error.message : '未知错误');
   }
@@ -224,13 +109,9 @@ function updatePreview(): void {
 async function handleDownload() {
   if (!currentData) return;
 
-  const dlStart = Date.now();
-  popupMarks.download_click = dlStart;
-
   const title = titleInput.value || currentData.title || 'untitled';
   const filename = sanitizeFilename(title);
   const markdown = getFullMarkdown();
-  popupMarks.download_markdown_ready = Date.now();
 
   // ===== 优先：Content Script 注入下载（绕过 Chrono）=====
   // 原理：在目标网页上下文中创建 blob URL，其 origin 为网页域名（如 blob:https://example.com/...）
@@ -251,19 +132,10 @@ async function handleDownload() {
         document.body.appendChild(a);
         a.click();
         document.body.removeChild(a);
-        // 延迟释放 Blob URL：Content Script 上下文无法用 onChanged 监听，
-        // 使用 60s 超时确保大文件和 saveAs 对话框场景有足够时间完成下载
         setTimeout(() => URL.revokeObjectURL(url), 60_000);
       },
       args: [markdown, `${filename}.md`, MARKDOWN_MIME],
     });
-    popupMarks.download_injected = Date.now();
-
-    console.log(
-      `[MD-perf] 下载注入耗时: ${popupMarks.download_injected - dlStart}ms ` +
-        `(markdown 渲染 ${popupMarks.download_markdown_ready - dlStart}ms, ` +
-        `executeScript ${popupMarks.download_injected - popupMarks.download_markdown_ready}ms)`
-    );
 
     updateStatus('✅ 下载成功');
     return;
