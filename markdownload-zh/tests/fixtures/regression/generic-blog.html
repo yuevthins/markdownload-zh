@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <title>个人博客测试文章 | example.com</title>
+  <meta name="description" content="一个用于回归测试的合成通用博客页面">
+  <meta property="og:title" content="个人博客测试文章">
+  <meta property="og:site_name" content="Example Blog">
+</head>
+<body>
+  <header class="site-header">
+    <nav>
+      <a href="/">首页</a> · <a href="/about">关于</a> · <a href="/archive">归档</a>
+    </nav>
+  </header>
+
+  <article class="post">
+    <h1>个人博客测试文章</h1>
+    <p class="meta">作者 Foo · 2026-01-15 · 阅读 5 分钟</p>
+
+    <h2>背景介绍</h2>
+    <p>这是一篇用于回归测试的虚构文章。正文内容会涵盖标题层级、列表、链接、图片、引用等常见 Markdown 元素，验证通用提取路径（无站点适配器命中时）的输出质量。</p>
+    <p>这一段是另一段足够长的正文内容，用来确保 defuddle 内容评分把这块认作主要正文。这里再补充一些上下文信息，避免被启发式过滤误删。</p>
+
+    <h2>正文细节</h2>
+
+    <h3>列表与强调</h3>
+    <p>下面是一个无序列表，包含 <strong>加粗</strong>、<em>斜体</em>、<code>行内代码</code> 三种文本样式：</p>
+    <ul>
+      <li>列表项 alpha：包含 <strong>加粗</strong> 文字。</li>
+      <li>列表项 beta：包含 <em>斜体</em> 文字。</li>
+      <li>列表项 gamma：包含 <code>code()</code> 行内代码。</li>
+    </ul>
+
+    <h3>链接与引用</h3>
+    <p>这里有一个外部 <a href="https://example.com/blog/another">站内链接</a>，以及一段引用：</p>
+    <blockquote>
+      <p>引用段落示例：测试 markdown 引用块的转换是否保留。</p>
+    </blockquote>
+
+    <h3>图片</h3>
+    <p>下面是一张图片：</p>
+    <p>
+      <img src="https://example.com/images/photo.jpg" alt="示例图片描述" width="800" height="450">
+    </p>
+
+    <h2>结语</h2>
+    <p>本节是文章的结尾段落，用一段较长的文字结束，让 defuddle 把这块也算到正文里。这是回归测试的一部分，保证从 H1 到 H3 的层级都被保留下来，列表和段落都不会因为内容过短被剔除。</p>
+  </article>
+
+  <aside class="sidebar">
+    <h2>侧栏</h2>
+    <p>侧栏推荐文章：unique-sidebar-noise，回归测试不应包含此内容。</p>
+    <ul>
+      <li><a href="#">推荐文章 1</a></li>
+      <li><a href="#">推荐文章 2</a></li>
+    </ul>
+  </aside>
+
+  <footer>
+    <p>unique-footer-noise © 2026 Example Blog</p>
+  </footer>
+</body>
+</html>

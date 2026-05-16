@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <title>多语言代码块回归 fixture</title>
+</head>
+<body>
+  <article>
+    <h1>多语言代码块回归 fixture</h1>
+    <p>本文用于验证不同语言、不同语法高亮风格的代码块都能转成带语言标记的围栏代码块。每个示例下面都有一段足够长的解释文字，避免 defuddle 内容评分把它过滤掉。</p>
+
+    <h2>JavaScript</h2>
+    <p>下面是一段使用 <code>language-js</code> class 的代码示例，验证最常见的 highlight.js / Prism 写法都能被识别。这里再加一段说明文字让段落不至于太短被剔除。</p>
+    <pre><code class="language-js">function greet(name) {
+  return `Hello, ${name}!`;
+}
+console.log(greet('world'));</code></pre>
+
+    <h2>Python</h2>
+    <p>Python 示例，class 写成 <code>language-python</code>，常见于 highlight.js 的 python 模块输出。这里也补上一段足够长的解释，让段落不被打分剔除。</p>
+    <pre><code class="language-python">def fib(n: int) -&gt; int:
+    if n &lt; 2:
+        return n
+    return fib(n - 1) + fib(n - 2)
+
+print([fib(i) for i in range(10)])</code></pre>
+
+    <h2>TypeScript</h2>
+    <p>TypeScript 示例，class 用 <code>lang-ts</code> 这种简写，验证另一种常见的语言标识写法也能识别。也加上一段补充描述。</p>
+    <pre><code class="lang-ts">interface User {
+  id: string;
+  name: string;
+}
+
+const u: User = { id: '1', name: 'Alice' };
+console.log(u);</code></pre>
+
+    <h2>Bash</h2>
+    <p>Bash 示例，验证 shell 类语言也能转出对应的围栏代码块。这里再写一段足够长的描述，避免被过滤。</p>
+    <pre><code class="language-bash">#!/usr/bin/env bash
+set -euo pipefail
+
+for f in *.md; do
+  echo &quot;processing $f&quot;
+done</code></pre>
+  </article>
+</body>
+</html>
