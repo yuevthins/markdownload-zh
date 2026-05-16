@@ -51,6 +51,7 @@ const wordCountEl = document.getElementById('word-count')!;
 const btnDownload = document.getElementById('btn-download')!;
 const btnCopy = document.getElementById('btn-copy')!;
 const btnRetry = document.getElementById('btn-retry')!;
+const btnOptions = document.getElementById('btn-options')!;
 const errorMessageEl = document.getElementById('error-message')!;
 
 // 会话级状态：ID 和日期只生成一次
@@ -353,6 +354,12 @@ titleInput.addEventListener('input', updatePreview);
 btnDownload.addEventListener('click', handleDownload);
 btnCopy.addEventListener('click', handleCopy);
 btnRetry.addEventListener('click', init);
+btnOptions.addEventListener('click', () => {
+  // 打开扩展 options 页（chrome.runtime.openOptionsPage 自动从 manifest 找）
+  chrome.runtime.openOptionsPage?.();
+  // 关掉 popup 让 options 页接管焦点（兼容部分浏览器不支持自动关闭 popup）
+  window.close();
+});
 
 // 启动
 init();

@@ -9,7 +9,7 @@ export default defineConfig({
     name: 'MarkDownload 中文版',
     description: '将网页内容剪藏为 Markdown 文件，专为 Obsidian 用户优化',
     version: '0.1.0',
-    permissions: ['activeTab', 'scripting', 'downloads'],
+    permissions: ['activeTab', 'scripting', 'downloads', 'storage'],
     action: {
       default_title: 'MarkDownload',
       default_popup: 'popup.html',
