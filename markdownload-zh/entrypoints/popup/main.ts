@@ -2,6 +2,8 @@ import { generateId, formatDate, formatDateTime } from '@/utils/id';
 import { sanitizeFilename } from '@/utils/filename';
 import { renderTemplate, DEFAULT_TEMPLATE } from '@/utils/template';
 import type { TemplateData, ExtractResult, ExtractedData } from '@/types';
+import { getSettings, DEFAULT_SETTINGS, type Settings } from '@/utils/settings';
+import { buildObsidianUri } from '@/utils/obsidian-uri';
 
 const MARKDOWN_MIME = 'text/markdown;charset=utf-8';
 
@@ -52,6 +54,7 @@ const btnDownload = document.getElementById('btn-download')!;
 const btnCopy = document.getElementById('btn-copy')!;
 const btnRetry = document.getElementById('btn-retry')!;
 const btnOptions = document.getElementById('btn-options')!;
+const btnObsidian = document.getElementById('btn-obsidian')!;
 const errorMessageEl = document.getElementById('error-message')!;
 
 // 会话级状态：ID 和日期只生成一次
@@ -59,6 +62,7 @@ let sessionId: string;
 let sessionDate: string;
 let sessionCapturedAt: string;
 let currentData: ExtractedData | null = null;
+let currentSettings: Settings = DEFAULT_SETTINGS;
 
 async function init() {
   mark('init_start');
@@ -68,6 +72,19 @@ async function init() {
   sessionId = generateId();
   sessionDate = formatDate();
   sessionCapturedAt = formatDateTime();
+
+  // 读取用户设置（决定 Obsidian 按钮是否显示）
+  try {
+    currentSettings = await getSettings();
+  } catch (e) {
+    console.warn('[MarkDownload] getSettings 失败，使用默认值:', e);
+    currentSettings = DEFAULT_SETTINGS;
+  }
+  if (currentSettings.mode === 'obsidian') {
+    btnObsidian.classList.remove('hidden');
+  } else {
+    btnObsidian.classList.add('hidden');
+  }
 
   try {
     const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
@@ -338,6 +355,49 @@ function showMain() {
   errorEl.classList.add('hidden');
 }
 
+// Obsidian 模式：构造 obsidian:// URI 直接保存到 vault
+// 100KB 阈值或空 vault 时自动降级为文件下载
+async function handleSaveToObsidian() {
+  if (!currentData) return;
+
+  const title = titleInput.value || currentData.title || 'untitled';
+  const filename = sanitizeFilename(title);
+  const markdown = getFullMarkdown();
+
+  const result = buildObsidianUri({
+    content: markdown,
+    title: filename,
+    vault: currentSettings.vaultName,
+    folder: currentSettings.vaultFolder,
+  });
+
+  if (result.type === 'uri') {
+    try {
+      const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+      if (!tab.id) throw new Error('无法获取标签页');
+      // 在当前 tab 导航到 obsidian:// — 浏览器会触发外部协议处理器
+      // 注：Chrome 在首次会弹出"在 Obsidian 中打开此链接"的确认提示
+      await chrome.tabs.update(tab.id, { url: result.value });
+      updateStatus('✅ 已保存到 Obsidian');
+      // 关掉 popup，让 Obsidian 接管焦点
+      window.close();
+    } catch (err) {
+      console.warn('[MarkDownload] obsidian:// 导航失败，降级到文件下载:', err);
+      updateStatus('⚠️ 打开 Obsidian 失败，已降级为文件下载');
+      await handleDownload();
+    }
+    return;
+  }
+
+  // fallback 路径：提示用户原因后调下载
+  if (result.reason === 'too-large') {
+    updateStatus('⚠️ 内容超过 100KB，已降级为文件下载');
+  } else if (result.reason === 'empty-vault') {
+    updateStatus('⚠️ 未配置 Vault 名称，已降级为文件下载（请到设置页配置）');
+  }
+  await handleDownload();
+}
+
 function showError(message: string) {
   loadingEl.classList.add('hidden');
   mainEl.classList.add('hidden');
@@ -353,6 +413,7 @@ function updateStatus(message: string) {
 titleInput.addEventListener('input', updatePreview);
 btnDownload.addEventListener('click', handleDownload);
 btnCopy.addEventListener('click', handleCopy);
+btnObsidian.addEventListener('click', handleSaveToObsidian);
 btnRetry.addEventListener('click', init);
 btnOptions.addEventListener('click', () => {
   // 打开扩展 options 页（chrome.runtime.openOptionsPage 自动从 manifest 找）
