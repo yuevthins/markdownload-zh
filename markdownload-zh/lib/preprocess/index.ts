@@ -80,9 +80,10 @@ export async function preprocessDOM(
 
       doc.querySelectorAll(allSelectors.join(', ')).forEach((el) => {
         // 站点特定选择器：无条件移除
-        if (adapterSelectorStr && el.matches(adapterSelectorStr)) {
-          el.remove();
-          return;
+        if (adapterSelectorStr) {
+          try {
+            if (el.matches(adapterSelectorStr)) { el.remove(); return; }
+          } catch { /* invalid selector — skip */ }
         }
         // 通用选择器：正文区域内不删除（广告 iframe 除外）
         if (mainContent && mainContent.contains(el)) {
