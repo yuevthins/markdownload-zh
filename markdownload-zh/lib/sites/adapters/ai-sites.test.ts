@@ -1,6 +1,5 @@
 import { describe, expect, it } from 'vitest';
 import { JSDOM } from 'jsdom';
-import { convertToMarkdown } from '../../convert';
 import { extractContent } from '../../extract';
 import { getSiteAdapter } from '..';
 
@@ -9,7 +8,8 @@ async function extract(html: string, url: string) {
   const doc = dom.window.document;
   const adapter = getSiteAdapter(url, doc);
   const result = await extractContent(doc, url, adapter);
-  const markdown = convertToMarkdown(result?.html || '', url);
+  // defuddle 引擎统一返回 markdown
+  const markdown = result?.markdown ?? '';
   return { adapter, result, markdown };
 }
 

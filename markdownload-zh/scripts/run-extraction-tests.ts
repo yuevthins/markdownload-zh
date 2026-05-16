@@ -14,16 +14,11 @@
  */
 
 import { JSDOM } from 'jsdom';
-import { Readability } from '@mozilla/readability';
-import TurndownService from 'turndown';
-import { gfm } from 'turndown-plugin-gfm';
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 
-// 导入工具函数
-import { normalizeImageUrl, isPlaceholderSrc, LAZY_IMAGE_ATTRS } from '../utils/lazy-image.js';
-import { removeZeroWidthChars } from '../utils/text-cleanup.js';
+import { runPipeline } from '../lib/pipeline.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -32,90 +27,8 @@ const FIXTURES_DIR = path.resolve(__dirname, '../tests/fixtures');
 const REPORTS_DIR = path.resolve(__dirname, '../tests/reports');
 
 // ============================================================
-// 提取逻辑（简化版，与 extractor.unlisted.ts 保持一致）
+// 提取逻辑：直接调用生产 pipeline，与扩展运行时一致
 // ============================================================
-
-function createTurndownService(): TurndownService {
-  const turndown = new TurndownService({
-    headingStyle: 'atx',
-    codeBlockStyle: 'fenced',
-    emDelimiter: '*',
-    bulletListMarker: '-',
-  });
-  turndown.use(gfm);
-  return turndown;
-}
-
-function preprocessLazyImages(doc: Document, baseUrl: string): void {
-  doc.querySelectorAll('img').forEach((img) => {
-    const currentSrc = img.getAttribute('src');
-    const hasLazyAttr = LAZY_IMAGE_ATTRS.some((attr) => img.hasAttribute(attr));
-
-    if (!isPlaceholderSrc(currentSrc) && !hasLazyAttr) {
-      return;
-    }
-
-    for (const attr of LAZY_IMAGE_ATTRS) {
-      const value = img.getAttribute(attr);
-      const normalizedUrl = normalizeImageUrl(value || '', baseUrl);
-      if (normalizedUrl) {
-        img.setAttribute('src', normalizedUrl);
-        break;
-      }
-    }
-  });
-}
-
-function normalizeTables(doc: Document): void {
-  doc.querySelectorAll('table').forEach((table) => {
-    Array.from(table.attributes).forEach((attr) => table.removeAttribute(attr.name));
-    table.querySelectorAll('colgroup').forEach((el) => el.remove());
-
-    table.querySelectorAll('thead, tbody, tfoot, tr, th, td').forEach((el) => {
-      const rowspan = el.getAttribute('rowspan');
-      const colspan = el.getAttribute('colspan');
-      Array.from(el.attributes).forEach((attr) => el.removeAttribute(attr.name));
-      if (rowspan) el.setAttribute('rowspan', rowspan);
-      if (colspan) el.setAttribute('colspan', colspan);
-    });
-
-    if (!table.querySelector('thead')) {
-      const firstRow = table.querySelector('tr');
-      if (firstRow) {
-        firstRow.querySelectorAll('td').forEach((td) => {
-          const th = doc.createElement('th');
-          while (td.firstChild) th.appendChild(td.firstChild);
-          td.replaceWith(th);
-        });
-        const thead = doc.createElement('thead');
-        thead.appendChild(firstRow);
-        let tbody = table.querySelector('tbody');
-        if (!tbody) {
-          tbody = doc.createElement('tbody');
-          table.querySelectorAll('tr').forEach((tr) => tbody!.appendChild(tr));
-        }
-        table.insertBefore(thead, table.firstChild);
-        if (!table.contains(tbody)) table.appendChild(tbody);
-      }
-    }
-
-    table.querySelectorAll('th, td').forEach((cell) => {
-      const blocks = cell.querySelectorAll('div, p');
-      blocks.forEach((block, idx) => {
-        if (idx > 0 && block.parentNode === cell) {
-          cell.insertBefore(doc.createElement('br'), block);
-        }
-        while (block.firstChild) block.parentNode?.insertBefore(block.firstChild, block);
-        block.remove();
-      });
-
-      cell.querySelectorAll('span').forEach((span) => {
-        while (span.firstChild) span.parentNode?.insertBefore(span.firstChild, span);
-        span.remove();
-      });
-    });
-  });
-}
 
 interface ExtractResult {
   success: boolean;
@@ -126,51 +39,29 @@ interface ExtractResult {
   duration: number;
 }
 
-function preprocessCSDN(doc: Document, url: string): void {
-  if (!url.includes('csdn.net')) return;
-
-  // CSDN 代码块清理：Prism.js 语法高亮会将代码包裹在大量 <span class="token ..."> 中
-  // 当代码示例包含 HTML 时，实体解码后会产生真实的 HTML 标签
-  // 解决方案：提取代码块的纯文本内容，移除所有 span 包装
-  doc.querySelectorAll('pre code').forEach((code) => {
-    const textContent = code.textContent || '';
-    code.textContent = textContent;
-  });
-}
-
-function extractFromHtml(html: string, url: string): ExtractResult {
+async function extractFromHtml(html: string, url: string): Promise<ExtractResult> {
   const startTime = Date.now();
 
   try {
     const dom = new JSDOM(html, { url });
-    const doc = dom.window.document;
+    const result = await runPipeline(dom.window.document, url);
 
-    preprocessLazyImages(doc, url);
-    preprocessCSDN(doc, url);
-    normalizeTables(doc);
-
-    const reader = new Readability(doc, { debug: false, charThreshold: 50 });
-    const article = reader.parse();
-
-    if (!article || !article.content) {
+    if (!result.success || !result.data) {
       return {
         success: false,
         title: '',
         markdown: '',
         charCount: 0,
-        error: 'NO_CONTENT',
+        error: result.error || 'NO_CONTENT',
         duration: Date.now() - startTime,
       };
     }
 
-    const turndown = createTurndownService();
-    const markdown = removeZeroWidthChars(turndown.turndown(article.content));
-
     return {
       success: true,
-      title: article.title || 'Untitled',
-      markdown: markdown.trim(),
-      charCount: markdown.length,
+      title: result.data.title,
+      markdown: result.data.markdown.trim(),
+      charCount: result.data.markdown.length,
       duration: Date.now() - startTime,
     };
   } catch (error) {
@@ -385,7 +276,7 @@ async function runTests(cases: TestCase[]): Promise<TestResult[]> {
 
       // 读取并测试
       const html = fs.readFileSync(fixturePath, 'utf-8');
-      const extraction = extractFromHtml(html, testCase.url);
+      const extraction = await extractFromHtml(html, testCase.url);
 
       // 检查结果
       const checkResults = runChecks(extraction.markdown, testCase.checks);
