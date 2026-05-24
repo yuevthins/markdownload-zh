@@ -212,6 +212,7 @@ site: example.com
 | Substack | `substack.com` |
 | Notion | `notion.site` / `notion.so` |
 | Reddit | `reddit.com`（支持 Shadow DOM） |
+| X / Twitter | `x.com` / `twitter.com`（区分 Article 长文与 Tweet，智能清理排版） |
 | TikTok Shop | `seller.tiktokshopglobalselling.com` |
 
 > **未适配的站点？** 扩展仍可通用提取，只是没有针对性优化。欢迎 [提 Issue](https://github.com/yuevthins/markdownload-zh/issues) 请求适配新站点。

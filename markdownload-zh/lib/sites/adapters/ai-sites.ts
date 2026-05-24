@@ -112,32 +112,7 @@ function metaFallback(doc: Document): { title: string; content: string } | null 
   return { title, content: root.innerHTML };
 }
 
-function extractTwitter(doc: Document): { title: string; content: string } | null {
-  const articles = [...doc.querySelectorAll<HTMLElement>('article[data-testid="tweet"], article')]
-    .filter((article) => text(article.querySelector('[data-testid="tweetText"]')) || text(article).length > 40)
-    .slice(0, 8);
 
-  if (articles.length === 0) return metaFallback(doc);
-
-  const title = titleFrom(doc, 'X / Twitter Post');
-  const root = doc.createElement('article');
-  const h1 = doc.createElement('h1');
-  h1.textContent = title;
-  root.appendChild(h1);
-
-  for (const article of articles) {
-    const item = cloneClean(article, [
-      '[data-testid="reply"]',
-      '[data-testid="retweet"]',
-      '[data-testid="like"]',
-      '[data-testid="caret"]',
-      '[role="group"]',
-    ]);
-    root.appendChild(item);
-  }
-
-  return { title, content: root.innerHTML };
-}
 
 function extractArxiv(doc: Document, url: string): { title: string; content: string } | null {
   const htmlArticle = doc.querySelector<HTMLElement>('article.ltx_document, .ltx_document, main article, article');
@@ -276,13 +251,6 @@ function extractArticleMain(doc: Document): { title: string; content: string } |
   return metaFallback(doc);
 }
 
-export const twitterAdapter: SiteAdapter = {
-  id: 'x-twitter',
-  match: (url: string) => url.includes('x.com/') || url.includes('twitter.com/'),
-  siteName: 'X / Twitter',
-  customExtract: extractTwitter,
-};
-
 export const arxivAdapter: SiteAdapter = {
   id: 'arxiv',
   match: (url: string) => url.includes('arxiv.org/') || url.includes('ar5iv.labs.arxiv.org/'),
@@ -398,7 +366,6 @@ export const aiInfoAdapters: SiteAdapter[] = [
 ];
 
 export const aiSiteAdapters: SiteAdapter[] = [
-  twitterAdapter,
   arxivAdapter,
   huggingFaceAdapter,
   papersWithCodeAdapter,
