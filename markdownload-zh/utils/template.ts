@@ -1,4 +1,4 @@
-import type { TemplateData } from '@/types';
+import type { TemplateData, ExtractedData } from '@/types';
 
 /**
  * 默认模板 - 符合用户 Vault Frontmatter 规范
@@ -48,4 +48,24 @@ export function renderTemplate(template: string, data: TemplateData): string {
   return template.replace(/\{\{(\w+)\}\}/g, (match, key: string) => {
     return key in replacements ? replacements[key] : match;
   });
+}
+
+/**
+ * 将提取结果转为完整 Markdown（含 Frontmatter）。
+ * 统一入口，消除 popup 和 quick-clip 的重复构造逻辑。
+ */
+export function buildMarkdown(
+  data: ExtractedData,
+  opts: { id: string; date: string; capturedAt: string; titleOverride?: string }
+): string {
+  const templateData: TemplateData = {
+    title: opts.titleOverride || data.title,
+    url: data.url,
+    date: opts.date,
+    id: opts.id,
+    content: data.markdown,
+    siteName: data.siteName,
+    capturedAt: opts.capturedAt,
+  };
+  return renderTemplate(DEFAULT_TEMPLATE, templateData);
 }

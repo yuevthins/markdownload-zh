@@ -1,7 +1,7 @@
 import { generateId, formatDate, formatDateTime } from '@/utils/id';
 import { sanitizeFilename } from '@/utils/filename';
-import { renderTemplate, DEFAULT_TEMPLATE } from '@/utils/template';
-import type { TemplateData, ExtractedData } from '@/types';
+import { buildMarkdown } from '@/utils/template';
+import type { ExtractedData } from '@/types';
 import { getSettings, DEFAULT_SETTINGS, type Settings } from '@/utils/settings';
 import { buildObsidianUri } from '@/utils/obsidian-uri';
 import { clipTab } from '@/lib/clip-flow';
@@ -75,23 +75,14 @@ async function init() {
   }
 }
 
-function createTemplateData(): TemplateData | null {
-  if (!currentData) return null;
-  return {
-    title: titleInput.value || currentData.title,
-    url: currentData.url,
-    date: sessionDate,
-    id: sessionId,
-    content: currentData.markdown,
-    siteName: currentData.siteName,
-    capturedAt: sessionCapturedAt,
-  };
-}
-
 function getFullMarkdown(): string {
-  const templateData = createTemplateData();
-  if (!templateData) return '';
-  return renderTemplate(DEFAULT_TEMPLATE, templateData);
+  if (!currentData) return '';
+  return buildMarkdown(currentData, {
+    id: sessionId,
+    date: sessionDate,
+    capturedAt: sessionCapturedAt,
+    titleOverride: titleInput.value || undefined,
+  });
 }
 
 let _lastPreview = '';
@@ -227,8 +218,7 @@ function showMain() {
   errorEl.classList.add('hidden');
 }
 
-// Obsidian 模式：构造 obsidian:// URI 直接保存到 vault
-// 100KB 阈值或空 vault 时自动降级为文件下载
+// Obsidian 模式：先写剪贴板，再通过 obsidian:// URI 让 Obsidian 从剪贴板读取
 async function handleSaveToObsidian() {
   if (!currentData) return;
 
@@ -243,30 +233,42 @@ async function handleSaveToObsidian() {
     folder: currentSettings.vaultFolder,
   });
 
+  if (result.type === 'clipboard') {
+    try {
+      await navigator.clipboard.writeText(result.content);
+      await chrome.tabs.create({ url: result.uri, active: false });
+      updateStatus('✅ 已保存到 Obsidian');
+      return;
+    } catch {
+      // 剪贴板失败，尝试 content URI
+      try {
+        const contentUri = `obsidian://new?file=${encodeURIComponent((currentSettings.vaultFolder ? currentSettings.vaultFolder + '/' : '') + filename)}&vault=${encodeURIComponent(currentSettings.vaultName)}&content=${encodeURIComponent(markdown)}`;
+        if (contentUri.length <= 100 * 1024) {
+          await chrome.tabs.create({ url: contentUri, active: false });
+          updateStatus('✅ 已保存到 Obsidian');
+          return;
+        }
+      } catch { /* fall through */ }
+      updateStatus('⚠️ 保存到 Obsidian 失败，已降级为文件下载');
+      await handleDownload();
+    }
+    return;
+  }
+
   if (result.type === 'uri') {
     try {
-      const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
-      if (!tab.id) throw new Error('无法获取标签页');
-      // 在当前 tab 导航到 obsidian:// — 浏览器会触发外部协议处理器
-      // 注：Chrome 在首次会弹出"在 Obsidian 中打开此链接"的确认提示
-      await chrome.tabs.update(tab.id, { url: result.value });
+      await chrome.tabs.create({ url: result.value, active: false });
       updateStatus('✅ 已保存到 Obsidian');
-      // 关掉 popup，让 Obsidian 接管焦点
-      window.close();
-    } catch (err) {
-      console.warn('[MarkDownload] obsidian:// 导航失败，降级到文件下载:', err);
+      return;
+    } catch {
       updateStatus('⚠️ 打开 Obsidian 失败，已降级为文件下载');
       await handleDownload();
     }
     return;
   }
 
-  // fallback 路径：提示用户原因后调下载
-  if (result.reason === 'too-large') {
-    updateStatus('⚠️ 内容超过 100KB，已降级为文件下载');
-  } else if (result.reason === 'empty-vault') {
-    updateStatus('⚠️ 未配置 Vault 名称，已降级为文件下载（请到设置页配置）');
-  }
+  // fallback: empty-vault
+  updateStatus('⚠️ 未配置 Vault 名称，已降级为文件下载（请到设置页配置）');
   await handleDownload();
 }
 

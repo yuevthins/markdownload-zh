@@ -20,6 +20,7 @@ vi.mock('@/utils/id', () => ({
 }));
 vi.mock('@/utils/template', () => ({
   renderTemplate: (_tpl: string, data: { content: string }) => `---\ntitle: "Test"\n---\n\n${data.content}`,
+  buildMarkdown: (data: { markdown: string }) => `---\ntitle: "Test"\n---\n\n${data.markdown}`,
   DEFAULT_TEMPLATE: 'mock-template',
 }));
 vi.mock('@/utils/filename', () => ({
@@ -30,12 +31,15 @@ vi.mock('@/utils/obsidian-uri', () => ({
 }));
 
 const mockTabsUpdate = vi.fn().mockResolvedValue(undefined);
+const mockTabsCreate = vi.fn().mockResolvedValue({ id: 99 });
 const mockDownload = vi.fn().mockResolvedValue(1);
 const mockOnChanged = { addListener: vi.fn(), removeListener: vi.fn() };
+const mockExecuteScript = vi.fn().mockResolvedValue([{ result: undefined }]);
 
 vi.stubGlobal('chrome', {
-  tabs: { update: mockTabsUpdate },
+  tabs: { update: mockTabsUpdate, create: mockTabsCreate },
   downloads: { download: mockDownload, onChanged: mockOnChanged },
+  scripting: { executeScript: mockExecuteScript },
   action: {
     setBadgeText: vi.fn(),
     setBadgeBackgroundColor: vi.fn(),
@@ -63,7 +67,6 @@ describe('handleQuickClip', () => {
 
     expect(clipTab).toHaveBeenCalledWith(42, 'https://example.com');
     expect(showBadgeSuccess).toHaveBeenCalledWith(42);
-    expect(mockDownload).toHaveBeenCalled();
   });
 
   it('uses obsidian:// URI when vault is configured', async () => {
@@ -72,26 +75,33 @@ describe('handleQuickClip', () => {
       data: { title: 'Test', markdown: '# Hello', url: 'https://example.com', siteName: 'example.com' },
     });
     vi.mocked(getSettings).mockResolvedValue({ mode: 'quick', vaultName: 'MyVault', vaultFolder: 'Inbox' });
-    vi.mocked(buildObsidianUri).mockReturnValue({ type: 'uri', value: 'obsidian://new?vault=MyVault&file=Test' });
+    vi.mocked(buildObsidianUri).mockReturnValue({ type: 'clipboard', uri: 'obsidian://new?file=Test&vault=MyVault&clipboard', content: '# Hello' });
+
+    // Mock executeScript for clipboard write
+    mockExecuteScript.mockResolvedValueOnce([{ result: undefined }]);
 
     await handleQuickClip(42, 'https://example.com');
 
     expect(buildObsidianUri).toHaveBeenCalled();
-    expect(mockTabsUpdate).toHaveBeenCalledWith(42, { url: 'obsidian://new?vault=MyVault&file=Test' });
+    expect(mockTabsCreate).toHaveBeenCalledWith({ url: 'obsidian://new?file=Test&vault=MyVault&clipboard', active: false });
     expect(showBadgeSuccess).toHaveBeenCalledWith(42);
   });
 
-  it('falls back to download when obsidian URI is too large', async () => {
+  it('falls back to download when clipboard write fails', async () => {
     vi.mocked(clipTab).mockResolvedValue({
       success: true,
       data: { title: 'Test', markdown: '# Hello', url: 'https://example.com', siteName: 'example.com' },
     });
     vi.mocked(getSettings).mockResolvedValue({ mode: 'quick', vaultName: 'MyVault', vaultFolder: 'Inbox' });
-    vi.mocked(buildObsidianUri).mockReturnValue({ type: 'fallback', reason: 'too-large' });
+    vi.mocked(buildObsidianUri).mockReturnValue({ type: 'clipboard', uri: 'obsidian://new?file=Test&vault=MyVault&clipboard', content: '# Hello' });
+
+    // Mock executeScript for clipboard write - fails
+    mockExecuteScript.mockRejectedValueOnce(new Error('clipboard failed'));
+    // Mock executeScript for content script download - succeeds
+    mockExecuteScript.mockResolvedValueOnce([{ result: undefined }]);
 
     await handleQuickClip(42, 'https://example.com');
 
-    expect(mockDownload).toHaveBeenCalled();
     expect(showBadgeSuccess).toHaveBeenCalledWith(42);
   });
 

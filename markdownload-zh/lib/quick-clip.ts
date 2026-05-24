@@ -7,10 +7,9 @@ import { clipTab } from '@/lib/clip-flow';
 import { showBadgeSuccess, showBadgeError } from '@/lib/badge';
 import { getSettings } from '@/utils/settings';
 import { generateId, formatDate, formatDateTime } from '@/utils/id';
-import { renderTemplate, DEFAULT_TEMPLATE } from '@/utils/template';
+import { buildMarkdown } from '@/utils/template';
 import { sanitizeFilename } from '@/utils/filename';
 import { buildObsidianUri } from '@/utils/obsidian-uri';
-import type { TemplateData } from '@/types';
 
 export async function handleQuickClip(tabId: number, url: string): Promise<void> {
   const result = await clipTab(tabId, url);
@@ -23,17 +22,11 @@ export async function handleQuickClip(tabId: number, url: string): Promise<void>
   const { data } = result;
   const settings = await getSettings();
 
-  // 生成完整 Markdown（含 Frontmatter）
-  const templateData: TemplateData = {
-    title: data.title,
-    url: data.url,
-    date: formatDate(),
+  const markdown = buildMarkdown(data, {
     id: generateId(),
-    content: data.markdown,
-    siteName: data.siteName,
+    date: formatDate(),
     capturedAt: formatDateTime(),
-  };
-  const markdown = renderTemplate(DEFAULT_TEMPLATE, templateData);
+  });
   const filename = sanitizeFilename(data.title);
 
   // 保存策略：vault 配置了用 obsidian://，否则文件下载
