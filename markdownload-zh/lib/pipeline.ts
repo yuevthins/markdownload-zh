@@ -31,10 +31,15 @@ export async function runPipeline(
   onMark?: (name: string) => void
 ): Promise<PipelineResult> {
   const mark = onMark || (() => {});
+  const t0 = Date.now();
+  const stages: Record<string, number> = {};
+
   try {
     mark('pl_start');
     // 获取站点适配器（URL 匹配 + DOM 检测）
     let adapter = getSiteAdapter(url, doc);
+    const tAdapter = Date.now();
+    stages.adapter = tAdapter - t0;
     mark('pl_adapter');
 
     // Stage 1: Preprocess（失败不中断）
@@ -43,6 +48,8 @@ export async function runPipeline(
     } catch (e) {
       console.warn('[Markdownload] Stage 1 (preprocess) failed:', e);
     }
+    const tPreprocess = Date.now();
+    stages.preprocess = tPreprocess - tAdapter;
     mark('pl_preprocess');
 
     // 如果 URL 没匹配到适配器，preprocess 后再用 DOM 检测一次
@@ -63,13 +70,20 @@ export async function runPipeline(
 
     // Stage 2: Extract（核心阶段，传入 sourceDoc 供 Shadow DOM 站点使用）
     const extracted = await extractContent(doc, url, adapter, sourceDoc);
+    const tExtract = Date.now();
+    stages.extract = tExtract - tPreprocess;
     mark('pl_extract');
     if (!extracted) {
-      return { success: false, error: 'NO_CONTENT' };
+      return {
+        success: false,
+        error: 'NO_CONTENT',
+        diagnostics: { adapter: adapter?.id ?? null, stages, contentLength: 0 },
+      };
     }
 
     // Stage 3: Format
     const formatted = formatMarkdown(extracted.markdown);
+    stages.format = Date.now() - tExtract;
     mark('pl_format');
 
     return {
@@ -80,12 +94,18 @@ export async function runPipeline(
         url,
         siteName: extracted.siteName,
       },
+      diagnostics: {
+        adapter: adapter?.id ?? null,
+        stages,
+        contentLength: formatted.length,
+      },
     };
   } catch (error) {
     console.error('[Markdownload] Pipeline error:', error);
     return {
       success: false,
       error: 'EXTRACTION_FAILED',
+      diagnostics: { adapter: null, stages, contentLength: 0 },
     };
   }
 }

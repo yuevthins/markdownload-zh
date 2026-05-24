@@ -3,7 +3,7 @@
  * 被 popup/main.ts 和 background.ts (quick mode) 共用。
  */
 
-import type { ExtractResult, ExtractedData } from '@/types';
+import type { ExtractResult, ExtractedData, ExtensionMessage } from '@/types';
 
 export type ClipResult =
   | { success: true; data: ExtractedData }
@@ -85,7 +85,7 @@ async function pollForResult(tabId: number, requestId: string): Promise<ExtractR
     };
 
     const messageListener = (msg: unknown) => {
-      const m = msg as { type?: string; requestId?: string } | null;
+      const m = msg as ExtensionMessage | null;
       if (m?.type === '__markdownload_done' && m?.requestId === requestId) {
         readResult().then((r) => settle(r || undefined));
       }

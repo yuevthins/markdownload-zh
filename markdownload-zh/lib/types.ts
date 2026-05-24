@@ -41,4 +41,13 @@ export interface PipelineResult {
     siteName?: string;
   };
   error?: string;
+  /** 阶段诊断信息（调试/测试用） */
+  diagnostics?: {
+    /** 匹配到的适配器 ID，null 表示通用提取 */
+    adapter: string | null;
+    /** 各阶段耗时 ms */
+    stages: Record<string, number>;
+    /** 提取内容字符数 */
+    contentLength: number;
+  };
 }

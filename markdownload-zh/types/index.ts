@@ -61,3 +61,11 @@ declare global {
     __markdownload_requestId?: string;
   }
 }
+
+/**
+ * 扩展内部消息协议（extractor → popup/background）
+ */
+export type ExtensionMessage = {
+  type: '__markdownload_done';
+  requestId: string;
+};
